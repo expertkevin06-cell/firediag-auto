@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur d'Icônes FireDiag</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #d32f2f, #ff5722);
+            min-height: 100vh;
+            color: white;
+        }
+        h1 { margin-bottom: 30px; }
+        .canvas-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+        .icon-box {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        canvas {
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        button {
+            background: white;
+            color: #d32f2f;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+        .info {
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+        .download-all {
+            background: #4caf50;
+            color: white;
+            font-size: 20px;
+            padding: 20px 60px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔥 Générateur d'Icônes FireDiag Auto</h1>
+    
+    <div class="canvas-container">
+        <div class="icon-box">
+            <h3>192x192</h3>
+            <canvas id="canvas192" width="192" height="192"></canvas>
+            <button onclick="downloadIcon('canvas192', 'icon-192.png')">️ Télécharger</button>
+        </div>
+        <div class="icon-box">
+            <h3>512x512</h3>
+            <canvas id="canvas512" width="512" height="512"></canvas>
+            <button onclick="downloadIcon('canvas512', 'icon-512.png')">⬇️ Télécharger</button>
+        </div>
+    </div>
+
+    <button class="download-all" onclick="downloadAll()">📦 Télécharger les 2 icônes (ZIP)</button>
+
+    <div class="info">
+        <h3>📋 Instructions :</h3>
+        <ol>
+            <li>Cliquez sur "Télécharger les 2 icônes"</li>
+            <li>Sur GitHub, créez le dossier <code>images/</code></li>
+            <li>Uploadez <code>icon-192.png</code> et <code>icon-512.png</code></li>
+            <li>Commit et activez GitHub Pages</li>
+        </ol>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        function drawIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const scale = size / 512;
+
+            // Fond dégradé
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#d32f2f');
+            gradient.addColorStop(1, '#ff5722');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // Bordure arrondie
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 20 * scale;
+            ctx.strokeRect(10 * scale, 10 * scale, size - 20 * scale, size - 20 * scale);
+
+            // Flamme stylisée
+            ctx.fillStyle = '#ffeb3b';
+            ctx.beginPath();
+            ctx.moveTo(size * 0.5, size * 0.1);
+            ctx.bezierCurveTo(
+                size * 0.3, size * 0.3,
+                size * 0.7, size * 0.4,
+                size * 0.5, size * 0.7
+            );
+            ctx.bezierCurveTo(
+                size * 0.6, size * 0.5,
+                size * 0.4, size * 0.5,
+                size * 0.5, size * 0.1
+            );
+            ctx.fill();
+
+            // Voiture simplifiée
+            ctx.fillStyle = 'white';
+            // Corps
+            ctx.fillRect(size * 0.15, size * 0.75, size * 0.7, size * 0.15);
+            // Toit
+            ctx.fillRect(size * 0.25, size * 0.65, size * 0.5, size * 0.12);
+            // Roues
+            ctx.fillStyle = '#212121';
+            ctx.beginPath();
+            ctx.arc(size * 0.25, size * 0.9, size * 0.08, 0, Math.PI * 2);
+            ctx.arc(size * 0.75, size * 0.9, size * 0.08, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Texte FD
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${60 * scale}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('FD', size * 0.5, size * 0.45);
+        }
+
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function downloadAll() {
+            const zip = new JSZip();
+            const canvas192 = document.getElementById('canvas192');
+            const canvas512 = document.getElementById('canvas512');
+            
+            const blob192 = await new Promise(resolve => canvas192.toBlob(resolve, 'image/png'));
+            const blob512 = await new Promise(resolve => canvas512.toBlob(resolve, 'image/png'));
+            
+            zip.file('icon-192.png', blob192);
+            zip.file('icon-512.png', blob512);
+            
+            const content = await zip.generateAsync({type: 'blob'});
+            const link = document.createElement('a');
+            link.download = 'firediag-icons.zip';
+            link.href = URL.createObjectURL(content);
+            link.click();
+        }
+
+        // Dessiner les icônes au chargement
+        window.onload = () => {
+            drawIcon('canvas192', 192);
+            drawIcon('canvas512', 512);
+        };
+    </script>
+</body>
+</html>
