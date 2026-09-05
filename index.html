@@ -45,7 +45,7 @@
     <div id="appScreen" class="screen" style="display:none;">
         <header class="app-header">
             <div class="header-left">
-                <button id="menuToggle" class="menu-btn">☰</button>
+                <button id="menuToggle" class="menu-btn"></button>
                 <h1>FireDiag Auto</h1>
             </div>
             <div class="header-right">
@@ -62,8 +62,8 @@
             <ul class="menu-items">
                 <li><a href="#" onclick="showSection('accueil')" class="active">🏠 Accueil</a></li>
                 <li><a href="#" onclick="showSection('incendie-electrique')">⚡ Incendie Électrique</a></li>
-                <li><a href="#" onclick="showSection('incendie-mecanique')"> Incendie Mécanique</a></li>
-                <li><a href="#" onclick="showSection('batteries')">🔋 Batteries HT/BT</a></li>
+                <li><a href="#" onclick="showSection('incendie-mecanique')">🔥 Incendie Mécanique</a></li>
+                <li><a href="#" onclick="showSection('batteries')"> Batteries HT/BT</a></li>
                 <li><a href="#" onclick="showSection('cables-cosses')">🔌 Câbles & Cosses</a></li>
                 <li><a href="#" onclick="showSection('feux-criminels')">🚨 Feux Criminels</a></li>
                 <li><a href="#" onclick="showSection('recherche-ia')">🤖 Recherche IA</a></li>
@@ -94,7 +94,7 @@
                         <p>HT, BT, consommation courant</p>
                     </div>
                     <div class="feature-card" onclick="showSection('cables-cosses')">
-                        <div class="feature-icon"></div>
+                        <div class="feature-icon">🔌</div>
                         <h3>Câblage</h3>
                         <p>Câbles, cosses, connectiques</p>
                     </div>
@@ -103,27 +103,32 @@
 
             <section id="incendie-electrique" class="section">
                 <h2>⚡ Départs d'Incendie Électriques</h2>
-                <p style="padding:20px; background:#fff; border-radius:8px;">Contenu de la fiche - Court-circuit, surchauffe, surcharge</p>
+                <div class="fiche-container">
+                    <div class="fiche">
+                        <h3>Court-Circuit</h3>
+                        <img id="img-court-circuit" src="" alt="Court-circuit" style="width:100%; border-radius:8px;">
+                    </div>
+                </div>
             </section>
 
             <section id="incendie-mecanique" class="section">
-                <h2>🔥 Départs d'Incendie Mécaniques</h2>
-                <p style="padding:20px; background:#fff; border-radius:8px;">Contenu de la fiche - Fuites échappement, FAP</p>
+                <h2> Départs d'Incendie Mécaniques</h2>
+                <p style="padding:20px; background:#fff; border-radius:8px;">Fuites sur échappement, FAP</p>
             </section>
 
             <section id="batteries" class="section">
                 <h2>🔋 Batteries HT/BT</h2>
-                <p style="padding:20px; background:#fff; border-radius:8px;">Contenu de la fiche - Batteries</p>
+                <p style="padding:20px; background:#fff; border-radius:8px;">Batteries haute et basse tension</p>
             </section>
 
             <section id="cables-cosses" class="section">
                 <h2>🔌 Câbles & Cosses</h2>
-                <p style="padding:20px; background:#fff; border-radius:8px;">Contenu de la fiche - Câblage</p>
+                <p style="padding:20px; background:#fff; border-radius:8px;">Câblage et connectiques</p>
             </section>
 
             <section id="feux-criminels" class="section">
-                <h2>🚨 Feux Criminels</h2>
-                <p style="padding:20px; background:#fff; border-radius:8px;">Contenu de la fiche - Identification</p>
+                <h2> Feux Criminels</h2>
+                <p style="padding:20px; background:#fff; border-radius:8px;">Identification des feux criminels</p>
             </section>
 
             <section id="recherche-ia" class="section">
@@ -140,8 +145,16 @@
                         <button onclick="saveGeminiKey()" class="btn-primary">💾 Sauvegarder</button>
                     </div>
                     <div class="admin-card">
-                        <h3>📥 Télécharger les Images</h3>
-                        <button onclick="downloadAllImages()" class="btn-primary"> Télécharger</button>
+                        <h3> Télécharger les Images</h3>
+                        <p>Téléchargez les 11 images pour le mode hors ligne</p>
+                        <button onclick="downloadAllImages()" class="btn-primary" id="downloadBtn">📥 Télécharger toutes les images</button>
+                        <div id="downloadProgress" style="margin-top:15px; display:none;">
+                            <div style="background:#e0e0e0; border-radius:8px; overflow:hidden; height:24px;">
+                                <div id="progressBar" style="background:#4caf50; height:100%; width:0%; transition:width 0.3s;"></div>
+                            </div>
+                            <p id="downloadStatus" style="margin-top:8px; font-size:14px;"></p>
+                        </div>
+                        <div id="downloadResult" style="margin-top:10px;"></div>
                     </div>
                 </div>
             </section>
@@ -151,7 +164,7 @@
     <div id="overlay" class="overlay" style="display:none;"></div>
 
     <script>
-        // AUTHENTIFICATION INTÉGRÉE
+        // AUTHENTIFICATION
         let currentUserType = null;
 
         function togglePasswordFields() {
@@ -178,35 +191,21 @@
             const email = document.getElementById('email').value;
             const errorDiv = document.getElementById('loginError');
 
-            if (!userType) {
-                errorDiv.textContent = 'Veuillez sélectionner un type d\'accès';
+            if (userType === 'admin' && password === 'Kevin83600') {
+                currentUserType = 'admin';
+                document.getElementById('loginScreen').classList.remove('active');
+                document.getElementById('appScreen').classList.add('active');
+                document.getElementById('appScreen').style.display = 'block';
+                document.getElementById('adminMenu').style.display = 'block';
+            } else if (userType === 'tier' && email && password) {
+                currentUserType = 'tier';
+                document.getElementById('loginScreen').classList.remove('active');
+                document.getElementById('appScreen').classList.add('active');
+                document.getElementById('appScreen').style.display = 'block';
+                document.getElementById('adminMenu').style.display = 'none';
+            } else {
+                errorDiv.textContent = ' Identifiants incorrects';
                 errorDiv.classList.add('show');
-                return;
-            }
-
-            if (userType === 'admin') {
-                if (password === 'Kevin83600') {
-                    currentUserType = 'admin';
-                    document.getElementById('loginScreen').classList.remove('active');
-                    document.getElementById('appScreen').classList.add('active');
-                    document.getElementById('appScreen').style.display = 'block';
-                    document.getElementById('adminMenu').style.display = 'block';
-                    console.log('✅ Connexion Admin réussie - Mot de passe: Kevin83600');
-                } else {
-                    errorDiv.textContent = '❌ Mot de passe incorrect (admin: Kevin83600)';
-                    errorDiv.classList.add('show');
-                }
-            } else if (userType === 'tier') {
-                if (email && password) {
-                    currentUserType = 'tier';
-                    document.getElementById('loginScreen').classList.remove('active');
-                    document.getElementById('appScreen').classList.add('active');
-                    document.getElementById('appScreen').style.display = 'block';
-                    document.getElementById('adminMenu').style.display = 'none';
-                } else {
-                    errorDiv.textContent = 'Email et mot de passe requis';
-                    errorDiv.classList.add('show');
-                }
             }
         });
 
@@ -222,7 +221,7 @@
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
             document.getElementById('sideMenu').classList.remove('active');
-            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('overlay').style.display = 'none';
         }
 
         document.getElementById('menuToggle').addEventListener('click', function() {
@@ -235,22 +234,142 @@
             document.getElementById('overlay').style.display = 'none';
         });
 
-        document.getElementById('overlay').addEventListener('click', function() {
-            document.getElementById('sideMenu').classList.remove('active');
-            this.style.display = 'none';
-        });
-
+        // SAUVEGARDER CLÉ GEMINI
         function saveGeminiKey() {
             const key = document.getElementById('geminiKeyInput').value;
-            localStorage.setItem('geminiApiKey', key);
-            alert('Clé Gemini sauvegardée !');
+            if (key) {
+                localStorage.setItem('geminiApiKey', key);
+                alert('✅ Clé Gemini sauvegardée !');
+            } else {
+                alert('⚠️ Veuillez entrer une clé');
+            }
         }
 
-        function downloadAllImages() {
-            alert('Fonctionnalité de téléchargement d\'images');
+        // TÉLÉCHARGER LES IMAGES - FONCTION COMPLÈTE
+        async function downloadAllImages() {
+            const images = [
+                { id: 'court-circuit', url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800' },
+                { id: 'surchauffe', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800' },
+                { id: 'surcharge', url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800' },
+                { id: 'echappement', url: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800' },
+                { id: 'fap', url: 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800' },
+                { id: 'batterie-bt', url: 'https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800' },
+                { id: 'batterie-ht', url: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800' },
+                { id: 'consommation', url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800' },
+                { id: 'cables', url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800' },
+                { id: 'cosses', url: 'https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800' },
+                { id: 'feu-criminel', url: 'https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800' }
+            ];
+
+            const btn = document.getElementById('downloadBtn');
+            const progressDiv = document.getElementById('downloadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const statusText = document.getElementById('downloadStatus');
+            const resultDiv = document.getElementById('downloadResult');
+
+            btn.disabled = true;
+            progressDiv.style.display = 'block';
+            resultDiv.innerHTML = '';
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (let i = 0; i < images.length; i++) {
+                const img = images[i];
+                statusText.textContent = `Téléchargement ${i + 1}/${images.length} : ${img.id}...`;
+                progressBar.style.width = ((i + 1) / images.length * 100) + '%';
+
+                try {
+                    const response = await fetch(img.url);
+                    const blob = await response.blob();
+                    
+                    // Convertir en base64
+                    const reader = new FileReader();
+                    reader.onloadend = function() {
+                        const base64data = reader.result;
+                        
+                        // Sauvegarder dans IndexedDB
+                        saveImageToIndexedDB(img.id, base64data);
+                        
+                        // Mettre à jour l'image si elle existe dans le DOM
+                        const imgElement = document.getElementById(`img-${img.id}`);
+                        if (imgElement) {
+                            imgElement.src = base64data;
+                        }
+                        
+                        successCount++;
+                        statusText.textContent = `✅ ${successCount}/${images.length} images téléchargées`;
+                        
+                        // Dernière image
+                        if (i === images.length - 1) {
+                            setTimeout(() => {
+                                resultDiv.innerHTML = `<div style="padding:12px; background:#c8e6c9; border-radius:8px; color:#2e7d32;">
+                                    ✅ Téléchargement terminé !<br>
+                                    Succès : ${successCount}/${images.length}<br>
+                                    Erreurs : ${errorCount}
+                                </div>`;
+                                btn.disabled = false;
+                            }, 500);
+                        }
+                    };
+                    reader.readAsDataURL(blob);
+                    
+                    // Attendre un peu entre chaque image
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    
+                } catch (error) {
+                    errorCount++;
+                    console.error(`Erreur ${img.id}:`, error);
+                    statusText.textContent = `❌ Erreur sur ${img.id}`;
+                }
+            }
         }
 
-        console.log('FireDiag Auto chargé - Admin: Kevin83600');
+        // Sauvegarder dans IndexedDB
+        function saveImageToIndexedDB(id, base64data) {
+            const request = indexedDB.open('FireDiagImages', 1);
+            
+            request.onupgradeneeded = function(e) {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('images')) {
+                    db.createObjectStore('images', { keyPath: 'id' });
+                }
+            };
+            
+            request.onsuccess = function(e) {
+                const db = e.target.result;
+                const transaction = db.transaction(['images'], 'readwrite');
+                const store = transaction.objectStore('images');
+                store.put({ id: id, data: base64data, date: Date.now() });
+            };
+        }
+
+        // Charger les images au démarrage
+        function loadSavedImages() {
+            const request = indexedDB.open('FireDiagImages', 1);
+            
+            request.onsuccess = function(e) {
+                const db = e.target.result;
+                const transaction = db.transaction(['images'], 'readonly');
+                const store = transaction.objectStore('images');
+                const getAllRequest = store.getAll();
+                
+                getAllRequest.onsuccess = function() {
+                    const images = getAllRequest.result;
+                    images.forEach(img => {
+                        const imgElement = document.getElementById(`img-${img.id}`);
+                        if (imgElement) {
+                            imgElement.src = img.data;
+                        }
+                    });
+                };
+            };
+        }
+
+        // Charger les images sauvegardées au démarrage
+        window.addEventListener('load', loadSavedImages);
+
+        console.log('FireDiag Auto v2.0 chargé - Admin: Kevin83600');
     </script>
 </body>
 </html>
