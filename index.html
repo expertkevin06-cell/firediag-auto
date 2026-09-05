@@ -4,39 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#d32f2f">
-    <meta name="description" content="Application de diagnostic des départs d'incendie véhicules">
-    <title>FireDiag Auto - Diagnostic Incendie Véhicules</title>
+    <title>FireDiag Auto</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="images/icon-192.png">
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-    <!-- [Même contenu que votre index.html actuel, mais remplacez les URLs Unsplash par :] -->
-    <!-- images/court-circuit.jpg au lieu de https://images.unsplash.com/... -->
-    <!-- images/surchauffe.jpg -->
-    <!-- images/surcharge.jpg -->
-    <!-- etc. -->
-    
     <div id="loginScreen" class="screen active">
-        <!-- ... même contenu ... -->
+        <div class="login-container">
+            <div class="logo">
+                <img src="images/icon-512.png" alt="FireDiag Logo">
+                <h1>FireDiag Auto</h1>
+                <p>Diagnostic des départs d'incendie</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="userType">Type d'accès :</label>
+                    <select id="userType" required>
+                        <option value="">Sélectionnez...</option>
+                        <option value="admin">Administrateur</option>
+                        <option value="tier">Tiers (accès limité)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="passwordGroup">
+                    <label for="password">Mot de passe :</label>
+                    <input type="password" id="password" placeholder="Entrez le mot de passe">
+                </div>
+                <div class="form-group" id="emailGroup" style="display:none;">
+                    <label for="email">Email :</label>
+                    <input type="email" id="email" placeholder="votre@email.com">
+                </div>
+                <button type="submit" class="btn-primary">Connexion</button>
+            </form>
+            <div id="loginError" class="error-message"></div>
+            <div id="debugInfo" style="margin-top:20px; padding:10px; background:#fff; color:#000; border-radius:8px; font-size:12px;"></div>
+        </div>
     </div>
 
-    <div id="appScreen" class="screen">
-        <!-- ... même contenu ... -->
-    </div>
-
-    <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/database.js"></script>
-    <script src="js/gemini.js"></script>
-    <script src="js/pdf.js"></script>
-    <script src="js/tokens.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/service-worker-register.js"></script>
+    <script>
+        // Debug : vérifier que le JS fonctionne
+        document.getElementById('debugInfo').innerHTML = '✅ JavaScript chargé';
+        
+        // Gestion du formulaire
+        document.getElementById('userType').addEventListener('change', function(e) {
+            const emailGroup = document.getElementById('emailGroup');
+            if (e.target.value === 'tier') {
+                emailGroup.style.display = 'block';
+            } else {
+                emailGroup.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userType = document.getElementById('userType').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (userType === 'admin' && password === 'Kevin83600') {
+                alert('✅ Connexion Admin réussie !');
+                document.getElementById('loginScreen').classList.remove('active');
+            } else {
+                errorDiv.textContent = '❌ Mot de passe incorrect';
+                errorDiv.classList.add('show');
+            }
+        });
+        
+        console.log('FireDiag Auto - Version minimale chargée');
+    </script>
 </body>
 </html>
