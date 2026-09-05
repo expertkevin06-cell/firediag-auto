@@ -1,0 +1,24 @@
+{
+    "name": "FireDiag Auto - Diagnostic Incendie Véhicules",
+    "short_name": "FireDiag",
+    "description": "Application d'aide au diagnostic des départs d'incendie sur véhicules automobiles",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f5f5f5",
+    "theme_color": "#d32f2f",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "images/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "images/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
