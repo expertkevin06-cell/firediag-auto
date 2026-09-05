@@ -1,11 +1,11 @@
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAkebsuk...",
+  apiKey: "AIzaSyAkebsuKnu-etYBobBmhMMUtiJtjNYo8u4",
   authDomain: "firediag-auto.firebaseapp.com",
   projectId: "firediag-auto",
-  storageBucket: "firediag-auto.appspot.com",
+  storageBucket: "firediag-auto.firebasestorage.app",
   messagingSenderId: "939193182729",
-  appId: "1:939193182729:web:..."
+  appId: "1:939193182729:web:5495a30e3cb586f63f26d8"
 };
 
 firebase.initializeApp(firebaseConfig);
