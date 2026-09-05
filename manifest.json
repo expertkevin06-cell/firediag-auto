@@ -20,5 +20,13 @@
             "type": "image/png",
             "purpose": "any maskable"
         }
+    ],
+    "categories": ["automotive", "utilities", "education"],
+    "screenshots": [
+        {
+            "src": "images/screenshot1.png",
+            "sizes": "1080x1920",
+            "type": "image/png"
+        }
     ]
 }
