@@ -12,4 +12,4 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const GEMINI_API_KEY = "VOTRE_CLE_GEMINI";
+const GEMINI_API_KEY = "AQ.Ab8RN6LB86gKsbwqUPLZCCHljthOnGznawNznbp4KlJ9-a30MA";
