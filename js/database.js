@@ -2,7 +2,7 @@
 class DatabaseManager {
     constructor() {
         this.dbName = APP_CONFIG.OFFLINE_STORAGE;
-        this.dbVersion = 1;
+        this.dbVersion = 2;
         this.indexedDB = null;
         this.initIndexedDB();
     }
@@ -29,7 +29,7 @@ class DatabaseManager {
                 ficheStore.createIndex('updatedAt', 'updatedAt', { unique: false });
             }
 
-            // Store pour les photos
+            // Store pour les photos uploadées
             if (!db.objectStoreNames.contains('photos')) {
                 const photoStore = db.createObjectStore('photos', { keyPath: 'id' });
                 photoStore.createIndex('ficheId', 'ficheId', { unique: false });
@@ -44,6 +44,13 @@ class DatabaseManager {
             // Store pour les statistiques
             if (!db.objectStoreNames.contains('stats')) {
                 db.createObjectStore('stats', { keyPath: 'id' });
+            }
+
+            // NOUVEAU : Store pour les images téléchargées
+            if (!db.objectStoreNames.contains('downloadedImages')) {
+                const imageStore = db.createObjectStore('downloadedImages', { keyPath: 'id' });
+                imageStore.createIndex('ficheId', 'ficheId', { unique: true });
+                imageStore.createIndex('downloadedAt', 'downloadedAt', { unique: false });
             }
         };
     }
@@ -84,7 +91,7 @@ class DatabaseManager {
         });
     }
 
-    // Sauvegarder une photo
+    // Sauvegarder une photo uploadée
     async savePhoto(photo) {
         return new Promise((resolve, reject) => {
             const transaction = this.indexedDB.transaction(['photos'], 'readwrite');
@@ -107,6 +114,95 @@ class DatabaseManager {
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
+    }
+
+    // NOUVEAU : Sauvegarder une image téléchargée
+    async saveDownloadedImage(imageData) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.indexedDB.transaction(['downloadedImages'], 'readwrite');
+            const store = transaction.objectStore('downloadedImages');
+            const request = store.put(imageData);
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // NOUVEAU : Récupérer une image téléchargée
+    async getDownloadedImage(ficheId) {
+        return new Promise((resolve, reject) => {
+            const transaction = this.indexedDB.transaction(['downloadedImages'], 'readonly');
+            const store = transaction.objectStore('downloadedImages');
+            const index = store.index('ficheId');
+            const request = index.get(ficheId);
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // NOUVEAU : Récupérer toutes les images téléchargées
+    async getAllDownloadedImages() {
+        return new Promise((resolve, reject) => {
+            const transaction = this.indexedDB.transaction(['downloadedImages'], 'readonly');
+            const store = transaction.objectStore('downloadedImages');
+            const request = store.getAll();
+
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // NOUVEAU : Télécharger une image depuis une URL
+    async downloadImageFromUrl(ficheId, url) {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const imageData = {
+                        id: `img_${ficheId}_${Date.now()}`,
+                        ficheId: ficheId,
+                        data: reader.result, // Base64
+                        url: url,
+                        downloadedAt: Date.now(),
+                        size: blob.size
+                    };
+                    
+                    await this.saveDownloadedImage(imageData);
+                    resolve(imageData);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        } catch (error) {
+            console.error(`Erreur téléchargement image ${ficheId}:`, error);
+            throw error;
+        }
+    }
+
+    // NOUVEAU : Télécharger toutes les images
+    async downloadAllImages() {
+        const results = {
+            success: [],
+            errors: [],
+            total: IMAGES_TO_DOWNLOAD.length
+        };
+
+        for (const imgConfig of IMAGES_TO_DOWNLOAD) {
+            try {
+                await this.downloadImageFromUrl(imgConfig.id, imgConfig.url);
+                results.success.push(imgConfig.id);
+                console.log(`✅ Image ${imgConfig.id} téléchargée`);
+            } catch (error) {
+                results.errors.push({ id: imgConfig.id, error: error.message });
+                console.error(`❌ Erreur image ${imgConfig.id}:`, error);
+            }
+        }
+
+        return results;
     }
 
     // Synchroniser avec Firestore (online)
