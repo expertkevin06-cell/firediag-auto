@@ -1,162 +1,194 @@
-// Système d'authentification
-const ADMIN_PASSWORD = "Kevin83600";
-let currentUser = null;
-let userType = 'guest'; // 'admin' ou 'guest'
-
-// Gestion du formulaire de connexion
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const password = document.getElementById('password').value;
-  
-  try {
-    if (password === ADMIN_PASSWORD) {
-      // Connexion Admin
-      userType = 'admin';
-      currentUser = {
-        uid: 'admin_' + Date.now(),
-        email: 'admin@diagfire.local',
-        isAdmin: true
-      };
-      
-      // Sauvegarder la session
-      localStorage.setItem('userType', 'admin');
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-      localStorage.setItem('sessionToken', generateUniqueToken());
-      
-      showApp();
-      logActivity('Connexion administrateur réussie');
-    } else {
-      // Tentative de connexion Firebase pour les utilisateurs tiers
-      await auth.signInWithEmailAndPassword('user@example.com', password);
-      userType = 'guest';
-      showApp();
+// Gestion de l'authentification - Version locale simplifiée
+class AuthManager {
+    constructor() {
+        this.currentUser = null;
+        this.userType = null;
+        this.init();
     }
-  } catch (error) {
-    showError('Mot de passe incorrect ou compte non autorisé');
-    console.error('Erreur de connexion:', error);
-  }
-});
 
-// Accès invité
-document.getElementById('guestAccess').addEventListener('click', async () => {
-  try {
-    // Connexion anonyme Firebase pour les invités
-    const result = await auth.signInAnonymously();
-    userType = 'guest';
-    currentUser = {
-      uid: result.user.uid,
-      email: 'guest@diagfire.local',
-      isAdmin: false
-    };
-    
-    localStorage.setItem('userType', 'guest');
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    showApp();
-    logActivity('Connexion invité');
-  } catch (error) {
-    showError('Accès invité non disponible. Contactez l\'administrateur.');
-    console.error('Erreur accès invité:', error);
-  }
-});
+    init() {
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin();
+            });
+        }
 
-// Déconnexion
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-  try {
-    await auth.signOut();
-    currentUser = null;
-    userType = 'guest';
-    localStorage.removeItem('userType');
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('sessionToken');
-    
-    document.getElementById('appScreen').classList.remove('active');
-    document.getElementById('loginScreen').classList.add('active');
-    document.getElementById('password').value = '';
-    
-    logActivity('Déconnexion');
-  } catch (error) {
-    console.error('Erreur déconnexion:', error);
-  }
-});
+        const userTypeSelect = document.getElementById('userType');
+        if (userTypeSelect) {
+            userTypeSelect.addEventListener('change', (e) => {
+                this.toggleLoginForm(e.target.value);
+            });
+        }
 
-// Afficher l'application
-function showApp() {
-  document.getElementById('loginScreen').classList.remove('active');
-  document.getElementById('appScreen').classList.add('active');
-  
-  // Configurer l'interface selon le type d'utilisateur
-  if (userType === 'admin') {
-    document.getElementById('userType').textContent = 'Admin';
-    document.getElementById('adminNavBtn').style.display = 'flex';
-  } else {
-    document.getElementById('userType').textContent = 'Invité';
-    document.getElementById('adminNavBtn').style.display = 'none';
-  }
-  
-  // Initialiser l'application
-  initApp();
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                this.logout();
+            });
+        }
+
+        // Vérifier si déjà connecté
+        this.checkExistingSession();
+    }
+
+    toggleLoginForm(userType) {
+        const passwordGroup = document.getElementById('passwordGroup');
+        const emailGroup = document.getElementById('emailGroup');
+        const passwordInput = document.getElementById('password');
+
+        if (!passwordGroup || !emailGroup) return;
+
+        if (userType === 'admin') {
+            passwordGroup.style.display = 'block';
+            emailGroup.style.display = 'none';
+            passwordInput.placeholder = "Mot de passe administrateur";
+        } else if (userType === 'tier') {
+            passwordGroup.style.display = 'block';
+            emailGroup.style.display = 'block';
+            passwordInput.placeholder = "Votre mot de passe";
+        } else {
+            passwordGroup.style.display = 'none';
+            emailGroup.style.display = 'none';
+        }
+    }
+
+    handleLogin() {
+        const userType = document.getElementById('userType').value;
+        const password = document.getElementById('password').value;
+        const email = document.getElementById('email').value;
+        const errorDiv = document.getElementById('loginError');
+
+        if (!userType) {
+            this.showError('Veuillez sélectionner un type d\'accès');
+            return;
+        }
+
+        if (userType === 'admin') {
+            // Connexion Admin - Mot de passe : Kevin83600
+            if (password === 'Kevin83600') {
+                this.currentUser = {
+                    id: 'admin',
+                    type: 'admin',
+                    email: 'admin@firediag.local'
+                };
+                this.userType = 'admin';
+                this.showAppScreen();
+                this.saveSession();
+                console.log('✅ Connexion Admin réussie');
+            } else {
+                this.showError('Mot de passe administrateur incorrect');
+            }
+        } else if (userType === 'tier') {
+            // Connexion Tiers - Simulation simple
+            if (email && password) {
+                this.currentUser = {
+                    id: email,
+                    type: 'tier',
+                    email: email
+                };
+                this.userType = 'tier';
+                this.showAppScreen();
+                this.saveSession();
+                console.log('✅ Connexion Tiers réussie');
+            } else {
+                this.showError('Email et mot de passe requis');
+            }
+        }
+    }
+
+    checkExistingSession() {
+        const savedSession = sessionStorage.getItem('firediag_session');
+        if (savedSession) {
+            try {
+                const session = JSON.parse(savedSession);
+                if (session.userType && session.loginTime) {
+                    // Session valide si moins de 24h
+                    const age = Date.now() - session.loginTime;
+                    if (age < 24 * 60 * 60 * 1000) {
+                        this.currentUser = session.user;
+                        this.userType = session.userType;
+                        this.showAppScreen();
+                    } else {
+                        sessionStorage.removeItem('firediag_session');
+                    }
+                }
+            } catch (e) {
+                console.error('Erreur session:', e);
+            }
+        }
+    }
+
+    showAppScreen() {
+        const loginScreen = document.getElementById('loginScreen');
+        const appScreen = document.getElementById('appScreen');
+        const adminMenu = document.getElementById('adminMenu');
+
+        if (loginScreen) loginScreen.classList.remove('active');
+        if (appScreen) appScreen.classList.add('active');
+        
+        if (adminMenu) {
+            adminMenu.style.display = this.userType === 'admin' ? 'block' : 'none';
+        }
+
+        console.log('🔐 Utilisateur connecté:', this.userType);
+    }
+
+    saveSession() {
+        const session = {
+            user: this.currentUser,
+            userType: this.userType,
+            loginTime: Date.now()
+        };
+        sessionStorage.setItem('firediag_session', JSON.stringify(session));
+    }
+
+    logout() {
+        this.currentUser = null;
+        this.userType = null;
+        sessionStorage.removeItem('firediag_session');
+        
+        const loginScreen = document.getElementById('loginScreen');
+        const appScreen = document.getElementById('appScreen');
+        
+        if (loginScreen) loginScreen.classList.add('active');
+        if (appScreen) appScreen.classList.remove('active');
+        
+        // Reset form
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) loginForm.reset();
+        
+        console.log('🔓 Déconnecté');
+    }
+
+    showError(message) {
+        const errorDiv = document.getElementById('loginError');
+        if (errorDiv) {
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
+        } else {
+            alert(message);
+        }
+    }
+
+    isAdmin() {
+        return this.userType === 'admin';
+    }
+
+    isTier() {
+        return this.userType === 'tier';
+    }
+
+    canAccess(section) {
+        if (this.isAdmin()) return true;
+        if (section === 'admin') return false;
+        return true;
+    }
 }
 
-// Générer un token unique
-function generateUniqueToken() {
-  return 'token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
-// Vérifier la session au chargement
-window.addEventListener('load', () => {
-  const savedUserType = localStorage.getItem('userType');
-  const savedUser = localStorage.getItem('currentUser');
-  
-  if (savedUserType && savedUser) {
-    userType = savedUserType;
-    currentUser = JSON.parse(savedUser);
-    showApp();
-  }
-});
-
-// Afficher les erreurs
-function showError(message) {
-  const errorDiv = document.getElementById('loginError');
-  errorDiv.textContent = message;
-  errorDiv.classList.add('active');
-  
-  setTimeout(() => {
-    errorDiv.classList.remove('active');
-  }, 5000);
-}
-
-// Journal d'activité
-function logActivity(action) {
-  const log = {
-    timestamp: new Date().toISOString(),
-    user: currentUser?.email || 'inconnu',
-    action: action,
-    userType: userType
-  };
-  
-  // Sauvegarder localement
-  let activityLog = JSON.parse(localStorage.getItem('activityLog') || '[]');
-  activityLog.push(log);
-  localStorage.setItem('activityLog', JSON.stringify(activityLog));
-  
-  // Sauvegarder dans Firebase si admin et connecté
-  if (userType === 'admin' && db) {
-    db.collection('activityLogs').add(log).catch(err => console.error(err));
-  }
-}
-
-// Vérifier les permissions
-function checkPermission(requiredType = 'guest') {
-  if (userType === 'admin') return true;
-  if (requiredType === 'guest' && userType === 'guest') return true;
-  return false;
-}
-
-// Exporter les fonctions
-window.auth = {
-  checkPermission,
-  logActivity,
-  currentUser,
-  userType
-};
+// Instance globale
+window.authManager = new AuthManager();
