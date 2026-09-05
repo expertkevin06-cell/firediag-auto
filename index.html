@@ -4,16 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#d32f2f">
-    <meta name="description" content="Application de diagnostic des départs d'incendie véhicules">
-    <title>FireDiag Auto - Diagnostic Incendie Véhicules</title>
+    <title>FireDiag Auto</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="images/icon-192.png">
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <!-- ÉCRAN DE CONNEXION -->
@@ -27,13 +21,13 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label for="userType">Type d'accès :</label>
-                    <select id="userType" required>
+                    <select id="userType" required onchange="togglePasswordFields()">
                         <option value="">Sélectionnez...</option>
                         <option value="admin">Administrateur</option>
                         <option value="tier">Tiers (accès limité)</option>
                     </select>
                 </div>
-                <div class="form-group" id="passwordGroup">
+                <div class="form-group" id="passwordGroup" style="display:none;">
                     <label for="password">Mot de passe :</label>
                     <input type="password" id="password" placeholder="Entrez le mot de passe">
                 </div>
@@ -48,7 +42,7 @@
     </div>
 
     <!-- APPLICATION PRINCIPALE -->
-    <div id="appScreen" class="screen">
+    <div id="appScreen" class="screen" style="display:none;">
         <header class="app-header">
             <div class="header-left">
                 <button id="menuToggle" class="menu-btn">☰</button>
@@ -60,500 +54,203 @@
             </div>
         </header>
 
-        <!-- MENU LATÉRAL -->
         <nav id="sideMenu" class="side-menu">
             <div class="menu-header">
                 <h3>Menu</h3>
                 <button id="closeMenu" class="close-btn">×</button>
             </div>
             <ul class="menu-items">
-                <li><a href="#" data-section="accueil" class="active">🏠 Accueil</a></li>
-                <li><a href="#" data-section="incendie-electrique">⚡ Incendie Électrique</a></li>
-                <li><a href="#" data-section="incendie-mecanique">🔥 Incendie Mécanique</a></li>
-                <li><a href="#" data-section="batteries">🔋 Batteries HT/BT</a></li>
-                <li><a href="#" data-section="cables-cosses">🔌 Câbles & Cosses</a></li>
-                <li><a href="#" data-section="feux-criminels">🚨 Feux Criminels</a></li>
-                <li><a href="#" data-section="recherche-ia">🤖 Recherche IA</a></li>
-                <li id="adminMenu" style="display:none;"><a href="#" data-section="admin">⚙️ Administration</a></li>
+                <li><a href="#" onclick="showSection('accueil')" class="active">🏠 Accueil</a></li>
+                <li><a href="#" onclick="showSection('incendie-electrique')">⚡ Incendie Électrique</a></li>
+                <li><a href="#" onclick="showSection('incendie-mecanique')"> Incendie Mécanique</a></li>
+                <li><a href="#" onclick="showSection('batteries')">🔋 Batteries HT/BT</a></li>
+                <li><a href="#" onclick="showSection('cables-cosses')">🔌 Câbles & Cosses</a></li>
+                <li><a href="#" onclick="showSection('feux-criminels')">🚨 Feux Criminels</a></li>
+                <li><a href="#" onclick="showSection('recherche-ia')">🤖 Recherche IA</a></li>
+                <li id="adminMenu" style="display:none;"><a href="#" onclick="showSection('admin')">⚙️ Administration</a></li>
             </ul>
         </nav>
 
-        <!-- CONTENU PRINCIPAL -->
         <main class="main-content">
-            <!-- ACCUEIL -->
             <section id="accueil" class="section active">
                 <div class="welcome-card">
                     <h2>Bienvenue sur FireDiag Auto</h2>
                     <p>Application d'aide au diagnostic des départs d'incendie sur véhicules</p>
                 </div>
                 <div class="features-grid">
-                    <div class="feature-card" data-section="incendie-electrique">
-                        <div class="feature-icon"></div>
+                    <div class="feature-card" onclick="showSection('incendie-electrique')">
+                        <div class="feature-icon">⚡</div>
                         <h3>Incendies Électriques</h3>
                         <p>Court-circuit, surchauffe, surcharge</p>
                     </div>
-                    <div class="feature-card" data-section="incendie-mecanique">
+                    <div class="feature-card" onclick="showSection('incendie-mecanique')">
                         <div class="feature-icon">🔥</div>
                         <h3>Incendies Mécaniques</h3>
                         <p>Fuites sur échappement, FAP</p>
                     </div>
-                    <div class="feature-card" data-section="batteries">
-                        <div class="feature-icon"></div>
+                    <div class="feature-card" onclick="showSection('batteries')">
+                        <div class="feature-icon">🔋</div>
                         <h3>Batteries</h3>
                         <p>HT, BT, consommation courant</p>
                     </div>
-                    <div class="feature-card" data-section="cables-cosses">
-                        <div class="feature-icon">🔌</div>
+                    <div class="feature-card" onclick="showSection('cables-cosses')">
+                        <div class="feature-icon"></div>
                         <h3>Câblage</h3>
                         <p>Câbles, cosses, connectiques</p>
                     </div>
                 </div>
             </section>
 
-            <!-- INCENDIE ÉLECTRIQUE -->
             <section id="incendie-electrique" class="section">
                 <h2>⚡ Départs d'Incendie Électriques</h2>
-                <div class="fiche-container">
-                    <div class="fiche" id="fiche-court-circuit">
-                        <h3>Court-Circuit Électrique</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Court-circuit" id="img-court-circuit" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 1 : Fusion du cuivre et carbonisation de l'isolation</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="court-circuit">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Causes principales :</h4>
-                                <ul>
-                                    <li>Isolation dégradée des câbles</li>
-                                    <li>Frottement câble/carrosserie</li>
-                                    <li>Humidité dans les connecteurs</li>
-                                    <li>Serrage insuffisant des cosses</li>
-                                    <li>Vieillissement des composants</li>
-                                </ul>
-                                <h4>Signes visibles :</h4>
-                                <ul>
-                                    <li>Fusion localisée du cuivre (voir image)</li>
-                                    <li>Marques d'arc électrique en étoile</li>
-                                    <li>Isolation carbonisée et craquelée</li>
-                                    <li>Dépôts de cuivre vaporisé (aspect argenté)</li>
-                                </ul>
-                                <h4>Diagnostic :</h4>
-                                <p>Mesurer la résistance d'isolement (>1 MΩ). Vérifier l'absence de continuité entre phases et masse.</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="court-circuit">📄 Exporter PDF</button>
-                    </div>
-
-                    <div class="fiche" id="fiche-surchauffe">
-                        <h3>Surchauffe Électrique</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Surchauffe" id="img-surchauffe" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 2 : Connecteur brûlé - Isolation durcie et craquelée</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="surchauffe">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Causes principales :</h4>
-                                <ul>
-                                    <li>Sous-dimensionnement des câbles</li>
-                                    <li>Mauvais contact (cosses oxydées)</li>
-                                    <li>Surcharge prolongée</li>
-                                    <li>Ventilation insuffisante</li>
-                                    <li>Ambiance thermique élevée</li>
-                                </ul>
-                                <h4>Signes visibles :</h4>
-                                <ul>
-                                    <li>Isolation durcie/craquelée (voir image)</li>
-                                    <li>Changement de couleur (brun/noir)</li>
-                                    <li>Déformation des composants plastiques</li>
-                                    <li>Odeur de brûlé caractéristique</li>
-                                </ul>
-                                <h4>Prévention :</h4>
-                                <p>Vérifier la section des câbles selon l'intensité. Contrôler le serrage des connexions.</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="surchauffe">📄 Exporter PDF</button>
-                    </div>
-
-                    <div class="fiche" id="fiche-surcharge">
-                        <h3>Surcharge Électrique</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Surcharge" id="img-surcharge" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 3 : Boîtier fusibles endommagé avec composants fondus</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="surcharge">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Causes principales :</h4>
-                                <ul>
-                                    <li>Ajout d'équipements non prévus</li>
-                                    <li>Fonctionnement simultané excessif</li>
-                                    <li>Défaut de régulation</li>
-                                    <li>Batterie défectueuse</li>
-                                </ul>
-                                <h4>Signes visibles :</h4>
-                                <ul>
-                                    <li>Fusibles grillés répétitifs</li>
-                                    <li>Disjoncteurs déclenchés</li>
-                                    <li>Échauffement anormal du boîtier</li>
-                                    <li>Batterie gonflée</li>
-                                </ul>
-                                <h4>Diagnostic :</h4>
-                                <p>Mesurer la consommation totale et comparer avec la capacité de l'alternateur.</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="surcharge">📄 Exporter PDF</button>
-                    </div>
-                </div>
+                <p style="padding:20px; background:#fff; border-radius:8px;">Contenu de la fiche - Court-circuit, surchauffe, surcharge</p>
             </section>
 
-            <!-- INCENDIE MÉCANIQUE -->
             <section id="incendie-mecanique" class="section">
                 <h2>🔥 Départs d'Incendie Mécaniques</h2>
-                <div class="fiche-container">
-                    <div class="fiche" id="fiche-echappement">
-                        <h3>Fuites sur Échappement</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Échappement" id="img-echappement" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 4 : Fuite d'huile sur collecteur et turbo</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="echappement">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Points critiques :</h4>
-                                <ul>
-                                    <li>Collecteur d'échappement (400-900°C)</li>
-                                    <li>Turbo (jusqu'à 1000°C)</li>
-                                    <li>Catalyseur/FAP (600-800°C)</li>
-                                    <li>Ligne d'échappement</li>
-                                </ul>
-                                <h4>Fluides inflammables :</h4>
-                                <ul>
-                                    <li>Huile moteur (point éclair >200°C)</li>
-                                    <li>Carburant (essence: -40°C, diesel: >55°C)</li>
-                                    <li>Liquide de direction assistée</li>
-                                    <li>Liquide de transmission</li>
-                                </ul>
-                                <h4>Identification :</h4>
-                                <p>Rechercher traces de suie, dépôts huileux (voir image), odeurs caractéristiques.</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="echappement">📄 Exporter PDF</button>
-                    </div>
-
-                    <div class="fiche" id="fiche-fap">
-                        <h3>Filtre à Particules (FAP/DPF)</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="FAP" id="img-fap" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 5 : FAP avec dépôts de suie - Risque de surchauffe</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="fap">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Risques d'incendie :</h4>
-                                <ul>
-                                    <li>Régénération bloquée/incomplète</li>
-                                    <li>Encrassement excessif (voir image)</li>
-                                    <li>Température régénération >600°C</li>
-                                    <li>Proximité éléments inflammables</li>
-                                    <li>Défaillance capteurs température</li>
-                                </ul>
-                                <h4>Signes avant-coureurs :</h4>
-                                <ul>
-                                    <li>Témoin FAP allumé</li>
-                                    <li>Perte de puissance</li>
-                                    <li>Surconsommation carburant</li>
-                                    <li>Fumées anormales</li>
-                                </ul>
-                                <h4>Prévention :</h4>
-                                <p>Respecter cycles de régénération. Éviter trajets courts répétés.</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="fap">📄 Exporter PDF</button>
-                    </div>
-                </div>
+                <p style="padding:20px; background:#fff; border-radius:8px;">Contenu de la fiche - Fuites échappement, FAP</p>
             </section>
 
-            <!-- BATTERIES -->
             <section id="batteries" class="section">
-                <h2>🔋 Batteries Haute et Basse Tension</h2>
-                <div class="fiche-container">
-                    <div class="fiche" id="fiche-batterie-bt">
-                        <h3>Batteries 12V/24V (Basse Tension)</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Batterie BT" id="img-batterie-bt" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 6 : Batterie 12V avec corrosion des cosses</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="batterie-bt">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Caractéristiques :</h4>
-                                <ul>
-                                    <li>Tension nominale: 12V ou 24V</li>
-                                    <li>Capacité: 40-100 Ah (véhicules légers)</li>
-                                    <li>Courant démarrage: 400-800A</li>
-                                    <li>Technologie: Plomb-acide, AGM, EFB, Lithium</li>
-                                </ul>
-                                <h4>Risques :</h4>
-                                <ul>
-                                    <li>Dégagement hydrogène (explosif)</li>
-                                    <li>Court-circuit (courants très élevés)</li>
-                                    <li>Surchauffe charge/décharge</li>
-                                    <li>Fuite électrolyte (acide sulfurique)</li>
-                                    <li>Corrosion des cosses (voir image)</li>
-                                </ul>
-                                <h4>Contrôles :</h4>
-                                <p>Vérifier tension (12.6V repos, 13.8-14.4V charge). Nettoyer la corrosion.</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="batterie-bt">📄 Exporter PDF</button>
-                    </div>
-
-                    <div class="fiche" id="fiche-batterie-ht">
-                        <h3>Batteries Haute Tension (Véhicules Électriques)</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Batterie HT" id="img-batterie-ht" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 7 : Pack batterie HT 650V DC - Danger de mort</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="batterie-ht">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Caractéristiques :</h4>
-                                <ul>
-                                    <li>Tension: 200-800V DC</li>
-                                    <li>Capacité: 20-100 kWh</li>
-                                    <li>Technologie: Li-ion (NMC, LFP, NCA)</li>
-                                    <li>Courant charge/décharge: 100-500A</li>
-                                </ul>
-                                <h4>Risques spécifiques :</h4>
-                                <ul>
-                                    <li>Emballement thermique (thermal runaway)</li>
-                                    <li>Dégagement gaz toxiques (HF, CO)</li>
-                                    <li>Réaction chimique avec eau</li>
-                                    <li>Électrocution (risque mortel)</li>
-                                    <li>Incendie difficile à éteindre</li>
-                                </ul>
-                                <h4>Sécurité :</h4>
-                                <p>Couper contact et attendre 10min. Utiliser EPI adaptés (gants classe 00).</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="batterie-ht">📄 Exporter PDF</button>
-                    </div>
-
-                    <div class="fiche" id="fiche-consommation">
-                        <h3>Consommation de Courant</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Consommation" id="img-consommation" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 8 : Mesure avec pince ampèremétrique</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="consommation">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Valeurs typiques :</h4>
-                                <ul>
-                                    <li>Démarrage: 200-600A (quelques secondes)</li>
-                                    <li>Alternateur: 50-150A max</li>
-                                    <li>Éclairage: 5-15A</li>
-                                    <li>Climatisation: 20-40A</li>
-                                    <li>Calculateur: 0.5-5A</li>
-                                    <li>Veille (parasite): <50mA</li>
-                                </ul>
-                                <h4>Mesure :</h4>
-                                <p>Utiliser pince ampèremétrique (voir image). Vérifier consommation au repos (<50mA).</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="consommation">📄 Exporter PDF</button>
-                    </div>
-                </div>
+                <h2>🔋 Batteries HT/BT</h2>
+                <p style="padding:20px; background:#fff; border-radius:8px;">Contenu de la fiche - Batteries</p>
             </section>
 
-            <!-- CÂBLES ET COSSES -->
             <section id="cables-cosses" class="section">
-                <h2>🔌 Câbles, Câblages et Cosses</h2>
-                <div class="fiche-container">
-                    <div class="fiche" id="fiche-cables">
-                        <h3>Câbles et Câblages</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Câbles" id="img-cables" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 9 : Faisceau de câbles automobile</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="cables">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Types de câbles :</h4>
-                                <ul>
-                                    <li>FLRY-B: Standard automobile</li>
-                                    <li>FLR2Y: Haute température (125°C)</li>
-                                    <li>FLR9Y: Très haute température (150°C)</li>
-                                    <li>HV: Haute tension (orange, isolation renforcée)</li>
-                                </ul>
-                                <h4>Sections recommandées :</h4>
-                                <ul>
-                                    <li>0.5 mm²: Signaux, éclairage intérieur</li>
-                                    <li>1.5 mm²: Éclairage extérieur</li>
-                                    <li>4-6 mm²: Alimentation accessoires</li>
-                                    <li>16-25 mm²: Démarrage, batterie</li>
-                                    <li>35-95 mm²: Câbles haute tension VE</li>
-                                </ul>
-                                <h4>Dégradation :</h4>
-                                <p>Vérifier fissures, dureté, changement couleur. Tester résistance d'isolement.</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="cables">📄 Exporter PDF</button>
-                    </div>
-
-                    <div class="fiche" id="fiche-cosses">
-                        <h3>Cosses et Connecteurs</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Cosses" id="img-cosses" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 10 : Cosses avec corrosion (vert-de-gris)</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="cosses">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Types de cosses :</h4>
-                                <ul>
-                                    <li>Cosses à sertir (isolées/nu)</li>
-                                    <li>Cosses à vis (œillets, fourches)</li>
-                                    <li>Connecteurs rapides</li>
-                                    <li>Bornes batterie</li>
-                                </ul>
-                                <h4>Problèmes courants :</h4>
-                                <ul>
-                                    <li>Oxydation/corrosion (vert-de-gris, voir image)</li>
-                                    <li>Desserrage (vibrations)</li>
-                                    <li>Sertissage défectueux</li>
-                                    <li>Mauvais contact (résistance élevée)</li>
-                                    <li>Infiltration humidité</li>
-                                </ul>
-                                <h4>Bonnes pratiques :</h4>
-                                <p>Nettoyer contacts. Appliquer graisse conductrice. Serrer au couple préconisé.</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="cosses"> Exporter PDF</button>
-                    </div>
-                </div>
+                <h2>🔌 Câbles & Cosses</h2>
+                <p style="padding:20px; background:#fff; border-radius:8px;">Contenu de la fiche - Câblage</p>
             </section>
 
-            <!-- FEUX CRIMINELS -->
             <section id="feux-criminels" class="section">
-                <h2>🚨 Identification Feux Criminels</h2>
-                <div class="fiche-container">
-                    <div class="fiche" id="fiche-criminel">
-                        <h3>Comment Identifier un Feu Criminel</h3>
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <img src="https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800" alt="Feu criminel" id="img-feu-criminel" crossorigin="anonymous">
-                                <p class="image-legend">Fig. 11 : Véhicule après incendie - Analyse forensic</p>
-                                <input type="file" accept="image/*" class="image-upload" data-field="feu-criminel">
-                            </div>
-                            <div class="fiche-info">
-                                <h4>Indices de criminalité :</h4>
-                                <ul>
-                                    <li><strong>Points d'inflammation multiples</strong> : Plusieurs foyers distincts</li>
-                                    <li><strong>Accélérateurs</strong> : Odeur hydrocarbures, traces liquides</li>
-                                    <li><strong>Destruction totale rapide</strong> : Temps de combustion anormalement court</li>
-                                    <li><strong>Absence de cause technique</strong> : Aucun défaut identifié</li>
-                                    <li><strong>Dégâts intérieurs</strong> : Feu démarré dans l'habitacle</li>
-                                    <li><strong>Systèmes désactivés</strong> : Batterie débranchée</li>
-                                </ul>
-                                <h4>Zones suspectes :</h4>
-                                <ul>
-                                    <li>Moquettes imprégnées (traces liquides)</li>
-                                    <li>Sous les sièges (dépôts anormaux)</li>
-                                    <li>Coffre (présence contenants)</li>
-                                    <li>Près des roues (pneumatiques)</li>
-                                </ul>
-                                <h4>Expertise :</h4>
-                                <p>Prélèvements pour analyse laboratoire. Photographier avant intervention.</p>
-                            </div>
-                        </div>
-                        <button class="btn-export-pdf" data-fiche="feu-criminel">📄 Exporter PDF</button>
-                    </div>
-                </div>
+                <h2>🚨 Feux Criminels</h2>
+                <p style="padding:20px; background:#fff; border-radius:8px;">Contenu de la fiche - Identification</p>
             </section>
 
-            <!-- RECHERCHE IA -->
             <section id="recherche-ia" class="section">
-                <h2>🤖 Recherche Intelligente (Gemini AI)</h2>
-                <div class="ia-container">
-                    <div class="search-box">
-                        <textarea id="geminiQuery" placeholder="Posez votre question sur les départs d'incendie véhicules..." rows="4"></textarea>
-                        <button id="searchGemini" class="btn-primary">Rechercher avec IA</button>
-                    </div>
-                    <div id="geminiLoading" class="loading" style="display:none;">
-                        <div class="spinner"></div>
-                        <p>Recherche en cours...</p>
-                    </div>
-                    <div id="geminiResults" class="results-container"></div>
-                </div>
+                <h2>🤖 Recherche IA</h2>
+                <p style="padding:20px; background:#fff; border-radius:8px;">Recherche Gemini AI</p>
             </section>
 
-            <!-- ADMINISTRATION -->
             <section id="admin" class="section">
                 <h2>⚙️ Administration</h2>
                 <div class="admin-panel">
                     <div class="admin-card">
                         <h3>🔑 Clé API Gemini</h3>
-                        <p>Modifiez la clé API Gemini pour la recherche IA</p>
-                        <div class="admin-form">
-                            <input type="password" id="currentGeminiKey" placeholder="Clé Gemini actuelle" readonly>
-                            <input type="password" id="newGeminiKey" placeholder="Nouvelle clé Gemini API">
-                            <button type="button" id="saveGeminiKey" class="btn-primary">💾 Sauvegarder la clé</button>
-                            <button type="button" id="resetGeminiKey" class="btn-primary" style="background:#ff9800;">🔄 Réinitialiser</button>
-                        </div>
-                        <div id="geminiKeyStatus" style="margin-top:10px; padding:10px; border-radius:6px; display:none;"></div>
+                        <input type="password" id="geminiKeyInput" placeholder="Clé API Gemini" style="width:100%; padding:10px; margin:10px 0; border-radius:6px; border:1px solid #ddd;">
+                        <button onclick="saveGeminiKey()" class="btn-primary">💾 Sauvegarder</button>
                     </div>
-
                     <div class="admin-card">
                         <h3>📥 Télécharger les Images</h3>
-                        <p>Téléchargez les 11 images des fiches techniques pour mode hors ligne</p>
-                        <button type="button" id="downloadImagesBtn" class="btn-primary">📥 Télécharger toutes les images</button>
-                        <div id="downloadProgress" style="margin-top:15px; display:none;">
-                            <div style="background:#e0e0e0; border-radius:8px; overflow:hidden; height:24px;">
-                                <div id="downloadProgressBar" style="background:#4caf50; height:100%; width:0%; transition:width 0.3s;"></div>
-                            </div>
-                            <p id="downloadStatus" style="margin-top:8px; font-size:14px;"></p>
-                        </div>
-                        <div id="downloadResult" style="margin-top:10px;"></div>
-                    </div>
-
-                    <div class="admin-card">
-                        <h3>👥 Gestion des Utilisateurs Tiers</h3>
-                        <div id="usersList" class="users-list"></div>
-                        <form id="addUserForm" class="admin-form">
-                            <input type="email" id="newUserEmail" placeholder="Email du tiers" required>
-                            <input type="password" id="newUserPassword" placeholder="Mot de passe temporaire" required>
-                            <button type="submit" class="btn-primary">Ajouter un tiers</button>
-                        </form>
-                    </div>
-
-                    <div class="admin-card">
-                        <h3> Gestion des Tokens Photos</h3>
-                        <p>Générez des tokens à usage unique pour importer des photos sécurisées</p>
-                        <button id="generateToken" class="btn-primary">Générer un token</button>
-                        <div id="tokenDisplay" class="token-display"></div>
-                    </div>
-
-                    <div class="admin-card">
-                        <h3>📊 Statistiques</h3>
-                        <div id="statsContainer" class="stats"></div>
+                        <button onclick="downloadAllImages()" class="btn-primary"> Télécharger</button>
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <div id="overlay" class="overlay"></div>
+    <div id="overlay" class="overlay" style="display:none;"></div>
 
-    <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/database.js"></script>
-    <script src="js/gemini.js"></script>
-    <script src="js/pdf.js"></script>
-    <script src="js/tokens.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/service-worker-register.js"></script>
+    <script>
+        // AUTHENTIFICATION INTÉGRÉE
+        let currentUserType = null;
+
+        function togglePasswordFields() {
+            const userType = document.getElementById('userType').value;
+            const passwordGroup = document.getElementById('passwordGroup');
+            const emailGroup = document.getElementById('emailGroup');
+            
+            if (userType === 'admin') {
+                passwordGroup.style.display = 'block';
+                emailGroup.style.display = 'none';
+            } else if (userType === 'tier') {
+                passwordGroup.style.display = 'block';
+                emailGroup.style.display = 'block';
+            } else {
+                passwordGroup.style.display = 'none';
+                emailGroup.style.display = 'none';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userType = document.getElementById('userType').value;
+            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value;
+            const errorDiv = document.getElementById('loginError');
+
+            if (!userType) {
+                errorDiv.textContent = 'Veuillez sélectionner un type d\'accès';
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            if (userType === 'admin') {
+                if (password === 'Kevin83600') {
+                    currentUserType = 'admin';
+                    document.getElementById('loginScreen').classList.remove('active');
+                    document.getElementById('appScreen').classList.add('active');
+                    document.getElementById('appScreen').style.display = 'block';
+                    document.getElementById('adminMenu').style.display = 'block';
+                    console.log('✅ Connexion Admin réussie - Mot de passe: Kevin83600');
+                } else {
+                    errorDiv.textContent = '❌ Mot de passe incorrect (admin: Kevin83600)';
+                    errorDiv.classList.add('show');
+                }
+            } else if (userType === 'tier') {
+                if (email && password) {
+                    currentUserType = 'tier';
+                    document.getElementById('loginScreen').classList.remove('active');
+                    document.getElementById('appScreen').classList.add('active');
+                    document.getElementById('appScreen').style.display = 'block';
+                    document.getElementById('adminMenu').style.display = 'none';
+                } else {
+                    errorDiv.textContent = 'Email et mot de passe requis';
+                    errorDiv.classList.add('show');
+                }
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            currentUserType = null;
+            document.getElementById('appScreen').classList.remove('active');
+            document.getElementById('appScreen').style.display = 'none';
+            document.getElementById('loginScreen').classList.add('active');
+            document.getElementById('loginForm').reset();
+        });
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            document.getElementById('sideMenu').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sideMenu').classList.add('active');
+            document.getElementById('overlay').style.display = 'block';
+        });
+
+        document.getElementById('closeMenu').addEventListener('click', function() {
+            document.getElementById('sideMenu').classList.remove('active');
+            document.getElementById('overlay').style.display = 'none';
+        });
+
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sideMenu').classList.remove('active');
+            this.style.display = 'none';
+        });
+
+        function saveGeminiKey() {
+            const key = document.getElementById('geminiKeyInput').value;
+            localStorage.setItem('geminiApiKey', key);
+            alert('Clé Gemini sauvegardée !');
+        }
+
+        function downloadAllImages() {
+            alert('Fonctionnalité de téléchargement d\'images');
+        }
+
+        console.log('FireDiag Auto chargé - Admin: Kevin83600');
+    </script>
 </body>
 </html>
