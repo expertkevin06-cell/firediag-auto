@@ -6,8 +6,101 @@
     <meta name="theme-color" content="#d32f2f">
     <title>FireDiag Auto</title>
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="images/icon-192.png">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        
+        /* Login Screen */
+        .login-container { max-width: 400px; margin: 100px auto; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo img { width: 120px; height: 120px; border-radius: 20px; margin-bottom: 15px; }
+        .logo h1 { color: #d32f2f; font-size: 28px; margin-bottom: 8px; }
+        .logo p { color: #757575; font-size: 14px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #d32f2f; }
+        
+        .btn-primary { width: 100%; padding: 14px; background: linear-gradient(135deg, #d32f2f, #ff5722); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(211,47,47,0.3); }
+        
+        .error-message { background: #ffebee; color: #c62828; padding: 12px; border-radius: 6px; margin-top: 15px; display: none; }
+        .error-message.show { display: block; }
+        
+        /* App Screen */
+        .app-header { background: linear-gradient(135deg, #d32f2f, #b71c1c); color: white; padding: 16px 20px; position: fixed; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .menu-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .app-header h1 { font-size: 20px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .status-indicator { font-size: 12px; color: #4caf50; }
+        .btn-logout { padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 6px; cursor: pointer; }
+        
+        /* Side Menu */
+        .side-menu { position: fixed; top: 0; left: -280px; width: 260px; height: 100vh; background: white; box-shadow: 2px 0 8px rgba(0,0,0,0.1); z-index: 200; transition: left 0.3s; overflow-y: auto; }
+        .side-menu.active { left: 0; }
+        .menu-header { background: linear-gradient(135deg, #d32f2f, #b71c1c); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .menu-header h3 { font-size: 18px; }
+        .close-btn { background: none; border: none; color: white; font-size: 28px; cursor: pointer; }
+        .menu-items { list-style: none; padding: 20px 0; }
+        .menu-items li a { display: block; padding: 14px 20px; color: #333; text-decoration: none; transition: all 0.2s; }
+        .menu-items li a:hover, .menu-items li a.active { background: #f5f5f5; color: #d32f2f; font-weight: 600; }
+        
+        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 150; display: none; }
+        .overlay.active { display: block; }
+        
+        /* Main Content */
+        .main-content { margin-top: 70px; padding: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .section h2 { color: #d32f2f; margin-bottom: 24px; font-size: 26px; }
+        
+        /* Welcome Card */
+        .welcome-card { background: linear-gradient(135deg, #d32f2f, #ff5722); color: white; padding: 40px; border-radius: 16px; text-align: center; margin-bottom: 32px; box-shadow: 0 4px 16px rgba(211,47,47,0.3); }
+        .welcome-card h2 { color: white; margin-bottom: 12px; font-size: 28px; }
+        .welcome-card p { font-size: 16px; opacity: 0.95; }
+        
+        /* Features Grid */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .feature-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s; text-align: center; }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+        .feature-icon { font-size: 48px; margin-bottom: 16px; }
+        .feature-card h3 { color: #d32f2f; margin-bottom: 8px; font-size: 18px; }
+        .feature-card p { color: #757575; font-size: 14px; }
+        
+        /* Fiches */
+        .fiche-container { display: grid; gap: 24px; }
+        .fiche { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .fiche h3 { color: #d32f2f; margin-bottom: 20px; font-size: 22px; padding-bottom: 12px; border-bottom: 2px solid #f5f5f5; }
+        .fiche-content { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; }
+        @media (max-width: 768px) { .fiche-content { grid-template-columns: 1fr; } }
+        .fiche-image img { width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .image-legend { font-size: 13px; color: #757575; font-style: italic; margin-top: 8px; padding: 8px; background: #f5f5f5; border-left: 3px solid #d32f2f; border-radius: 4px; }
+        .fiche-info h4 { color: #333; margin: 16px 0 8px 0; font-size: 16px; }
+        .fiche-info ul { margin-left: 20px; margin-bottom: 12px; }
+        .fiche-info li { margin-bottom: 6px; color: #555; }
+        .fiche-info p { color: #555; line-height: 1.6; }
+        
+        /* Admin Panel */
+        .admin-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .admin-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .admin-card h3 { color: #d32f2f; margin-bottom: 16px; font-size: 18px; }
+        .admin-card p { color: #757575; margin-bottom: 16px; }
+        .admin-form input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #e0e0e0; border-radius: 8px; }
+        
+        /* Download Progress */
+        #downloadProgress { margin-top: 15px; }
+        #downloadProgressBar { background: #4caf50; height: 100%; width: 0%; transition: width 0.3s; border-radius: 8px; }
+        #downloadStatus { margin-top: 8px; font-size: 14px; color: #555; }
+        #downloadResult { margin-top: 10px; }
+        
+        .screen { display: none; }
+        .screen.active { display: block; }
+    </style>
 </head>
 <body>
     <!-- ÉCRAN DE CONNEXION -->
@@ -42,14 +135,14 @@
     </div>
 
     <!-- APPLICATION PRINCIPALE -->
-    <div id="appScreen" class="screen" style="display:none;">
+    <div id="appScreen" class="screen">
         <header class="app-header">
             <div class="header-left">
-                <button id="menuToggle" class="menu-btn"></button>
+                <button id="menuToggle" class="menu-btn">☰</button>
                 <h1>FireDiag Auto</h1>
             </div>
             <div class="header-right">
-                <span id="connectionStatus" class="status-indicator online">●</span>
+                <span id="connectionStatus" class="status-indicator">● Online</span>
                 <button id="logoutBtn" class="btn-logout">Déconnexion</button>
             </div>
         </header>
@@ -60,22 +153,25 @@
                 <button id="closeMenu" class="close-btn">×</button>
             </div>
             <ul class="menu-items">
-                <li><a href="#" onclick="showSection('accueil')" class="active">🏠 Accueil</a></li>
-                <li><a href="#" onclick="showSection('incendie-electrique')">⚡ Incendie Électrique</a></li>
-                <li><a href="#" onclick="showSection('incendie-mecanique')">🔥 Incendie Mécanique</a></li>
-                <li><a href="#" onclick="showSection('batteries')"> Batteries HT/BT</a></li>
-                <li><a href="#" onclick="showSection('cables-cosses')">🔌 Câbles & Cosses</a></li>
-                <li><a href="#" onclick="showSection('feux-criminels')">🚨 Feux Criminels</a></li>
-                <li><a href="#" onclick="showSection('recherche-ia')">🤖 Recherche IA</a></li>
-                <li id="adminMenu" style="display:none;"><a href="#" onclick="showSection('admin')">⚙️ Administration</a></li>
+                <li><a href="#" onclick="showSection('accueil')" id="link-accueil" class="active"> Accueil</a></li>
+                <li><a href="#" onclick="showSection('incendie-electrique')" id="link-incendie-electrique">⚡ Incendie Électrique</a></li>
+                <li><a href="#" onclick="showSection('incendie-mecanique')" id="link-incendie-mecanique">🔥 Incendie Mécanique</a></li>
+                <li><a href="#" onclick="showSection('batteries')" id="link-batteries"> Batteries HT/BT</a></li>
+                <li><a href="#" onclick="showSection('cables-cosses')" id="link-cables-cosses">🔌 Câbles & Cosses</a></li>
+                <li><a href="#" onclick="showSection('feux-criminels')" id="link-feux-criminels">🚨 Feux Criminels</a></li>
+                <li><a href="#" onclick="showSection('recherche-ia')" id="link-recherche-ia">🤖 Recherche IA</a></li>
+                <li id="adminMenu" style="display:none;"><a href="#" onclick="showSection('admin')" id="link-admin">⚙️ Administration</a></li>
             </ul>
         </nav>
 
+        <div id="overlay" class="overlay"></div>
+
         <main class="main-content">
+            <!-- ACCUEIL -->
             <section id="accueil" class="section active">
                 <div class="welcome-card">
                     <h2>Bienvenue sur FireDiag Auto</h2>
-                    <p>Application d'aide au diagnostic des départs d'incendie sur véhicules</p>
+                    <p>Application d'aide au diagnostic des départs d'incendie sur véhicules automobiles</p>
                 </div>
                 <div class="features-grid">
                     <div class="feature-card" onclick="showSection('incendie-electrique')">
@@ -84,7 +180,7 @@
                         <p>Court-circuit, surchauffe, surcharge</p>
                     </div>
                     <div class="feature-card" onclick="showSection('incendie-mecanique')">
-                        <div class="feature-icon">🔥</div>
+                        <div class="feature-icon"></div>
                         <h3>Incendies Mécaniques</h3>
                         <p>Fuites sur échappement, FAP</p>
                     </div>
@@ -101,54 +197,189 @@
                 </div>
             </section>
 
+            <!-- INCENDIE ÉLECTRIQUE -->
             <section id="incendie-electrique" class="section">
                 <h2>⚡ Départs d'Incendie Électriques</h2>
                 <div class="fiche-container">
                     <div class="fiche">
-                        <h3>Court-Circuit</h3>
-                        <img id="img-court-circuit" src="" alt="Court-circuit" style="width:100%; border-radius:8px;">
+                        <h3>Court-Circuit Électrique</h3>
+                        <div class="fiche-content">
+                            <div class="fiche-image">
+                                <img id="img-court-circuit" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Court-circuit">
+                                <p class="image-legend">Fig. 1 : Fusion du cuivre et carbonisation</p>
+                            </div>
+                            <div class="fiche-info">
+                                <h4>Causes principales :</h4>
+                                <ul>
+                                    <li>Isolation dégradée des câbles</li>
+                                    <li>Frottement câble/carrosserie</li>
+                                    <li>Humidité dans les connecteurs</li>
+                                    <li>Serrage insuffisant des cosses</li>
+                                </ul>
+                                <h4>Signes visibles :</h4>
+                                <ul>
+                                    <li>Fusion localisée du cuivre</li>
+                                    <li>Marques d'arc électrique</li>
+                                    <li>Isolation carbonisée</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fiche">
+                        <h3>Surchauffe Électrique</h3>
+                        <div class="fiche-content">
+                            <div class="fiche-image">
+                                <img id="img-surchauffe" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Surchauffe">
+                                <p class="image-legend">Fig. 2 : Connecteur brûlé</p>
+                            </div>
+                            <div class="fiche-info">
+                                <h4>Causes principales :</h4>
+                                <ul>
+                                    <li>Sous-dimensionnement des câbles</li>
+                                    <li>Mauvais contact</li>
+                                    <li>Surcharge prolongée</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
+            <!-- INCENDIE MÉCANIQUE -->
             <section id="incendie-mecanique" class="section">
-                <h2> Départs d'Incendie Mécaniques</h2>
-                <p style="padding:20px; background:#fff; border-radius:8px;">Fuites sur échappement, FAP</p>
+                <h2>🔥 Départs d'Incendie Mécaniques</h2>
+                <div class="fiche-container">
+                    <div class="fiche">
+                        <h3>Fuites sur Échappement</h3>
+                        <div class="fiche-content">
+                            <div class="fiche-image">
+                                <img id="img-echappement" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Échappement">
+                                <p class="image-legend">Fig. 3 : Fuite d'huile sur turbo</p>
+                            </div>
+                            <div class="fiche-info">
+                                <h4>Points critiques :</h4>
+                                <ul>
+                                    <li>Collecteur (400-900°C)</li>
+                                    <li>Turbo (jusqu'à 1000°C)</li>
+                                    <li>Catalyseur/FAP (600-800°C)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
+            <!-- BATTERIES -->
             <section id="batteries" class="section">
                 <h2>🔋 Batteries HT/BT</h2>
-                <p style="padding:20px; background:#fff; border-radius:8px;">Batteries haute et basse tension</p>
+                <div class="fiche-container">
+                    <div class="fiche">
+                        <h3>Batteries 12V/24V</h3>
+                        <div class="fiche-content">
+                            <div class="fiche-image">
+                                <img id="img-batterie-bt" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Batterie BT">
+                                <p class="image-legend">Fig. 4 : Batterie avec corrosion</p>
+                            </div>
+                            <div class="fiche-info">
+                                <h4>Caractéristiques :</h4>
+                                <ul>
+                                    <li>Tension: 12V ou 24V</li>
+                                    <li>Capacité: 40-100 Ah</li>
+                                    <li>Courant démarrage: 400-800A</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fiche">
+                        <h3>Batteries Haute Tension</h3>
+                        <div class="fiche-content">
+                            <div class="fiche-image">
+                                <img id="img-batterie-ht" src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Batterie HT">
+                                <p class="image-legend">Fig. 5 : Pack batterie 650V DC</p>
+                            </div>
+                            <div class="fiche-info">
+                                <h4>Risques :</h4>
+                                <ul>
+                                    <li>Emballement thermique</li>
+                                    <li>Électrocution (mortel)</li>
+                                    <li>Gaz toxiques</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
+            <!-- CÂBLES & COSSES -->
             <section id="cables-cosses" class="section">
                 <h2>🔌 Câbles & Cosses</h2>
-                <p style="padding:20px; background:#fff; border-radius:8px;">Câblage et connectiques</p>
+                <div class="fiche-container">
+                    <div class="fiche">
+                        <h3>Câbles et Câblages</h3>
+                        <div class="fiche-content">
+                            <div class="fiche-image">
+                                <img id="img-cables" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Câbles">
+                                <p class="image-legend">Fig. 6 : Faisceau de câbles</p>
+                            </div>
+                            <div class="fiche-info">
+                                <h4>Types :</h4>
+                                <ul>
+                                    <li>FLRY-B: Standard</li>
+                                    <li>FLR2Y: 125°C</li>
+                                    <li>HV: Haute tension (orange)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
+            <!-- FEUX CRIMINELS -->
             <section id="feux-criminels" class="section">
-                <h2> Feux Criminels</h2>
-                <p style="padding:20px; background:#fff; border-radius:8px;">Identification des feux criminels</p>
+                <h2>🚨 Feux Criminels</h2>
+                <div class="fiche">
+                    <h3>Comment Identifier</h3>
+                    <div class="fiche-content">
+                        <div class="fiche-image">
+                            <img id="img-feu-criminel" src="https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800" alt="Feu criminel">
+                            <p class="image-legend">Fig. 7 : Véhicule après incendie</p>
+                        </div>
+                        <div class="fiche-info">
+                            <h4>Indices :</h4>
+                            <ul>
+                                <li>Points d'inflammation multiples</li>
+                                <li>Traces d'accélérateurs</li>
+                                <li>Destruction rapide</li>
+                                <li>Systèmes désactivés</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </section>
 
+            <!-- RECHERCHE IA -->
             <section id="recherche-ia" class="section">
                 <h2>🤖 Recherche IA</h2>
-                <p style="padding:20px; background:#fff; border-radius:8px;">Recherche Gemini AI</p>
+                <div class="fiche">
+                    <p style="padding:20px; background:#f5f5f5; border-radius:8px;">Fonctionnalité Gemini AI - Nécessite une clé API</p>
+                </div>
             </section>
 
+            <!-- ADMINISTRATION -->
             <section id="admin" class="section">
-                <h2>⚙️ Administration</h2>
+                <h2>️ Administration</h2>
                 <div class="admin-panel">
                     <div class="admin-card">
                         <h3>🔑 Clé API Gemini</h3>
-                        <input type="password" id="geminiKeyInput" placeholder="Clé API Gemini" style="width:100%; padding:10px; margin:10px 0; border-radius:6px; border:1px solid #ddd;">
+                        <p>Modifiez la clé pour la recherche IA</p>
+                        <input type="password" id="geminiKeyInput" placeholder="Clé API Gemini">
                         <button onclick="saveGeminiKey()" class="btn-primary">💾 Sauvegarder</button>
                     </div>
                     <div class="admin-card">
                         <h3> Télécharger les Images</h3>
-                        <p>Téléchargez les 11 images pour le mode hors ligne</p>
-                        <button onclick="downloadAllImages()" class="btn-primary" id="downloadBtn">📥 Télécharger toutes les images</button>
-                        <div id="downloadProgress" style="margin-top:15px; display:none;">
+                        <p>Téléchargez les 11 images pour mode hors ligne</p>
+                        <button onclick="downloadAllImages()" class="btn-primary" id="downloadBtn">📥 Télécharger</button>
+                        <div id="downloadProgress" style="display:none; margin-top:15px;">
                             <div style="background:#e0e0e0; border-radius:8px; overflow:hidden; height:24px;">
                                 <div id="progressBar" style="background:#4caf50; height:100%; width:0%; transition:width 0.3s;"></div>
                             </div>
@@ -161,27 +392,14 @@
         </main>
     </div>
 
-    <div id="overlay" class="overlay" style="display:none;"></div>
-
     <script>
         // AUTHENTIFICATION
         let currentUserType = null;
 
         function togglePasswordFields() {
             const userType = document.getElementById('userType').value;
-            const passwordGroup = document.getElementById('passwordGroup');
-            const emailGroup = document.getElementById('emailGroup');
-            
-            if (userType === 'admin') {
-                passwordGroup.style.display = 'block';
-                emailGroup.style.display = 'none';
-            } else if (userType === 'tier') {
-                passwordGroup.style.display = 'block';
-                emailGroup.style.display = 'block';
-            } else {
-                passwordGroup.style.display = 'none';
-                emailGroup.style.display = 'none';
-            }
+            document.getElementById('passwordGroup').style.display = userType === 'admin' ? 'block' : 'none';
+            document.getElementById('emailGroup').style.display = userType === 'tier' ? 'block' : 'none';
         }
 
         document.getElementById('loginForm').addEventListener('submit', function(e) {
@@ -195,16 +413,14 @@
                 currentUserType = 'admin';
                 document.getElementById('loginScreen').classList.remove('active');
                 document.getElementById('appScreen').classList.add('active');
-                document.getElementById('appScreen').style.display = 'block';
                 document.getElementById('adminMenu').style.display = 'block';
             } else if (userType === 'tier' && email && password) {
                 currentUserType = 'tier';
                 document.getElementById('loginScreen').classList.remove('active');
                 document.getElementById('appScreen').classList.add('active');
-                document.getElementById('appScreen').style.display = 'block';
                 document.getElementById('adminMenu').style.display = 'none';
             } else {
-                errorDiv.textContent = ' Identifiants incorrects';
+                errorDiv.textContent = '❌ Mot de passe incorrect (admin: Kevin83600)';
                 errorDiv.classList.add('show');
             }
         });
@@ -212,18 +428,28 @@
         document.getElementById('logoutBtn').addEventListener('click', function() {
             currentUserType = null;
             document.getElementById('appScreen').classList.remove('active');
-            document.getElementById('appScreen').style.display = 'none';
             document.getElementById('loginScreen').classList.add('active');
             document.getElementById('loginForm').reset();
         });
 
+        // NAVIGATION
         function showSection(sectionId) {
+            // Cacher toutes les sections
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            // Montrer la section demandée
             document.getElementById(sectionId).classList.add('active');
+            // Mettre à jour le menu
+            document.querySelectorAll('.menu-items a').forEach(a => a.classList.remove('active'));
+            const activeLink = document.getElementById('link-' + sectionId);
+            if (activeLink) activeLink.classList.add('active');
+            // Fermer le menu
             document.getElementById('sideMenu').classList.remove('active');
             document.getElementById('overlay').style.display = 'none';
+            // Scroll en haut
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // MENU
         document.getElementById('menuToggle').addEventListener('click', function() {
             document.getElementById('sideMenu').classList.add('active');
             document.getElementById('overlay').style.display = 'block';
@@ -234,30 +460,29 @@
             document.getElementById('overlay').style.display = 'none';
         });
 
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sideMenu').classList.remove('active');
+            this.style.display = 'none';
+        });
+
         // SAUVEGARDER CLÉ GEMINI
         function saveGeminiKey() {
             const key = document.getElementById('geminiKeyInput').value;
             if (key) {
                 localStorage.setItem('geminiApiKey', key);
                 alert('✅ Clé Gemini sauvegardée !');
-            } else {
-                alert('⚠️ Veuillez entrer une clé');
             }
         }
 
-        // TÉLÉCHARGER LES IMAGES - FONCTION COMPLÈTE
+        // TÉLÉCHARGER IMAGES
         async function downloadAllImages() {
             const images = [
                 { id: 'court-circuit', url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800' },
                 { id: 'surchauffe', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800' },
-                { id: 'surcharge', url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800' },
                 { id: 'echappement', url: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800' },
-                { id: 'fap', url: 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800' },
                 { id: 'batterie-bt', url: 'https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800' },
                 { id: 'batterie-ht', url: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800' },
-                { id: 'consommation', url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800' },
                 { id: 'cables', url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800' },
-                { id: 'cosses', url: 'https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800' },
                 { id: 'feu-criminel', url: 'https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800' }
             ];
 
@@ -269,10 +494,7 @@
 
             btn.disabled = true;
             progressDiv.style.display = 'block';
-            resultDiv.innerHTML = '';
-
             let successCount = 0;
-            let errorCount = 0;
 
             for (let i = 0; i < images.length; i++) {
                 const img = images[i];
@@ -282,94 +504,60 @@
                 try {
                     const response = await fetch(img.url);
                     const blob = await response.blob();
-                    
-                    // Convertir en base64
                     const reader = new FileReader();
                     reader.onloadend = function() {
                         const base64data = reader.result;
-                        
-                        // Sauvegarder dans IndexedDB
-                        saveImageToIndexedDB(img.id, base64data);
-                        
-                        // Mettre à jour l'image si elle existe dans le DOM
-                        const imgElement = document.getElementById(`img-${img.id}`);
-                        if (imgElement) {
-                            imgElement.src = base64data;
-                        }
-                        
+                        const imgElement = document.getElementById('img-' + img.id);
+                        if (imgElement) imgElement.src = base64data;
+                        saveImageToDB(img.id, base64data);
                         successCount++;
-                        statusText.textContent = `✅ ${successCount}/${images.length} images téléchargées`;
-                        
-                        // Dernière image
-                        if (i === images.length - 1) {
-                            setTimeout(() => {
-                                resultDiv.innerHTML = `<div style="padding:12px; background:#c8e6c9; border-radius:8px; color:#2e7d32;">
-                                    ✅ Téléchargement terminé !<br>
-                                    Succès : ${successCount}/${images.length}<br>
-                                    Erreurs : ${errorCount}
-                                </div>`;
-                                btn.disabled = false;
-                            }, 500);
-                        }
                     };
                     reader.readAsDataURL(blob);
-                    
-                    // Attendre un peu entre chaque image
                     await new Promise(resolve => setTimeout(resolve, 300));
-                    
                 } catch (error) {
-                    errorCount++;
-                    console.error(`Erreur ${img.id}:`, error);
-                    statusText.textContent = `❌ Erreur sur ${img.id}`;
+                    console.error('Erreur:', error);
                 }
             }
+
+            setTimeout(() => {
+                resultDiv.innerHTML = '<div style="padding:12px; background:#c8e6c9; border-radius:8px; color:#2e7d32;">✅ Téléchargement terminé ! ' + successCount + '/' + images.length + '</div>';
+                btn.disabled = false;
+            }, 1000);
         }
 
-        // Sauvegarder dans IndexedDB
-        function saveImageToIndexedDB(id, base64data) {
+        function saveImageToDB(id, data) {
             const request = indexedDB.open('FireDiagImages', 1);
-            
             request.onupgradeneeded = function(e) {
                 const db = e.target.result;
                 if (!db.objectStoreNames.contains('images')) {
                     db.createObjectStore('images', { keyPath: 'id' });
                 }
             };
-            
             request.onsuccess = function(e) {
                 const db = e.target.result;
-                const transaction = db.transaction(['images'], 'readwrite');
-                const store = transaction.objectStore('images');
-                store.put({ id: id, data: base64data, date: Date.now() });
+                const tx = db.transaction(['images'], 'readwrite');
+                tx.objectStore('images').put({ id: id, data: data, date: Date.now() });
             };
         }
 
-        // Charger les images au démarrage
         function loadSavedImages() {
             const request = indexedDB.open('FireDiagImages', 1);
-            
             request.onsuccess = function(e) {
                 const db = e.target.result;
-                const transaction = db.transaction(['images'], 'readonly');
-                const store = transaction.objectStore('images');
-                const getAllRequest = store.getAll();
-                
-                getAllRequest.onsuccess = function() {
-                    const images = getAllRequest.result;
-                    images.forEach(img => {
-                        const imgElement = document.getElementById(`img-${img.id}`);
-                        if (imgElement) {
-                            imgElement.src = img.data;
-                        }
+                const tx = db.transaction(['images'], 'readonly');
+                const store = tx.objectStore('images');
+                const getAll = store.getAll();
+                getAll.onsuccess = function() {
+                    getAll.result.forEach(img => {
+                        const imgElement = document.getElementById('img-' + img.id);
+                        if (imgElement) imgElement.src = img.data;
                     });
                 };
             };
         }
 
-        // Charger les images sauvegardées au démarrage
         window.addEventListener('load', loadSavedImages);
-
-        console.log('FireDiag Auto v2.0 chargé - Admin: Kevin83600');
+        console.log('FireDiag Auto v3.0 chargé - Admin: Kevin83600');
     </script>
 </body>
 </html>
