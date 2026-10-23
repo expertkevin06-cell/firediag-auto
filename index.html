@@ -2,1515 +2,203 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Diag incendie by Kevin - Base technique expert incendie NFPA 921, véhicules thermiques et électriques, investigation">
     <meta name="theme-color" content="#d32f2f">
-    <title>FireDiag Auto - Expert Sapeur-Pompier</title>
+
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="images/icon-192.png">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
-        
-        .login-container { max-width: 400px; margin: 100px auto; padding: 40px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo img { width: 120px; height: 120px; border-radius: 20px; margin-bottom: 15px; }
-        .logo h1 { color: #d32f2f; font-size: 28px; margin-bottom: 8px; }
-        .logo p { color: #757575; font-size: 14px; }
-        
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #d32f2f; }
-        
-        .btn-primary { width: 100%; padding: 14px; background: linear-gradient(135deg, #d32f2f, #ff5722); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(211,47,47,0.3); }
-        
-        .error-message { background: #ffebee; color: #c62828; padding: 12px; border-radius: 6px; margin-top: 15px; display: none; }
-        .error-message.show { display: block; }
-        
-        .app-header { background: linear-gradient(135deg, #d32f2f, #b71c1c); color: white; padding: 16px 20px; position: fixed; top: 0; left: 0; right: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .header-left { display: flex; align-items: center; gap: 16px; }
-        .menu-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-        .app-header h1 { font-size: 20px; }
-        .header-right { display: flex; align-items: center; gap: 12px; }
-        .status-indicator { font-size: 12px; color: #4caf50; }
-        .btn-logout { padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 6px; cursor: pointer; }
-        
-        .side-menu { position: fixed; top: 0; left: -320px; width: 320px; height: 100vh; background: white; box-shadow: 2px 0 8px rgba(0,0,0,0.15); z-index: 200; transition: left 0.3s; overflow-y: auto; }
-        .side-menu.active { left: 0; }
-        .menu-header { background: linear-gradient(135deg, #d32f2f, #b71c1c); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .menu-header h3 { font-size: 18px; }
-        .close-btn { background: none; border: none; color: white; font-size: 28px; cursor: pointer; }
-        .menu-items { list-style: none; padding: 20px 0; }
-        .menu-items li a { display: block; padding: 14px 20px; color: #333; text-decoration: none; transition: all 0.2s; border-left: 4px solid transparent; }
-        .menu-items li a:hover, .menu-items li a.active { background: #fff3f3; color: #d32f2f; font-weight: 600; border-left-color: #d32f2f; }
-        
-        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 150; display: none; }
-        .overlay.active { display: block; }
-        
-        .main-content { margin-top: 70px; padding: 20px; max-width: 1400px; margin-left: auto; margin-right: auto; }
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .section h2 { color: #d32f2f; margin-bottom: 24px; font-size: 30px; padding-bottom: 12px; border-bottom: 3px solid #f5f5f5; }
-        .section-intro { background: white; padding: 24px; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 5px solid #d32f2f; }
-        .section-intro p { line-height: 1.8; color: #555; font-size: 16px; }
-        
-        .welcome-card { background: linear-gradient(135deg, #d32f2f, #ff5722); color: white; padding: 40px; border-radius: 16px; text-align: center; margin-bottom: 32px; box-shadow: 0 4px 16px rgba(211,47,47,0.3); }
-        .welcome-card h2 { color: white; margin-bottom: 12px; font-size: 32px; }
-        .welcome-card p { font-size: 16px; opacity: 0.95; }
-        
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .feature-card { background: white; padding: 28px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s; text-align: center; border: 2px solid transparent; }
-        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); border-color: #d32f2f; }
-        .feature-icon { font-size: 56px; margin-bottom: 16px; }
-        .feature-card h3 { color: #d32f2f; margin-bottom: 12px; font-size: 20px; }
-        .feature-card p { color: #757575; font-size: 14px; line-height: 1.6; }
-        
-        /* Fiches détaillées */
-        .fiche-container { display: grid; gap: 28px; }
-        .fiche { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); border-top: 5px solid #d32f2f; }
-        .fiche h3 { color: #d32f2f; margin-bottom: 24px; font-size: 26px; display: flex; align-items: center; gap: 12px; }
-        .fiche h3::before { content: "🔍"; font-size: 32px; }
-        
-        .fiche-section { margin: 28px 0; padding: 24px; background: #fafafa; border-radius: 8px; border-left: 5px solid #ff5722; }
-        .fiche-section h4 { color: #333; margin-bottom: 16px; font-size: 20px; font-weight: 700; }
-        .fiche-section h4::before { content: "▸ "; color: #d32f2f; }
-        .fiche-section ul { margin-left: 28px; margin-bottom: 16px; }
-        .fiche-section li { margin-bottom: 10px; color: #555; line-height: 1.8; }
-        .fiche-section p { color: #555; line-height: 1.8; margin-bottom: 16px; }
-        .fiche-section ol { margin-left: 28px; margin-bottom: 16px; }
-        .fiche-section ol li { margin-bottom: 10px; color: #555; line-height: 1.8; }
-        
-        .fiche-content { display: grid; grid-template-columns: 1fr 2fr; gap: 28px; margin: 24px 0; }
-        @media (max-width: 968px) { .fiche-content { grid-template-columns: 1fr; } }
-        
-        .image-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 24px 0; }
-        .image-gallery img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s; cursor: pointer; }
-        .image-gallery img:hover { transform: scale(1.05); }
-        .image-legend { font-size: 13px; color: #757575; font-style: italic; margin-top: 8px; padding: 10px; background: #f5f5f5; border-left: 4px solid #d32f2f; border-radius: 4px; line-height: 1.4; }
-        
-        .warning-box { background: #fff3cd; border-left: 5px solid #ff9800; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .warning-box.danger { background: #ffebee; border-left-color: #f44336; }
-        .warning-box.success { background: #e8f5e9; border-left-color: #4caf50; }
-        .warning-box.info { background: #e3f2fd; border-left-color: #2196f3; }
-        .warning-box strong { color: #333; font-size: 16px; }
-        
-        .diagnostic-table { width: 100%; border-collapse: collapse; margin: 24px 0; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
-        .diagnostic-table th { background: linear-gradient(135deg, #d32f2f, #ff5722); color: white; padding: 16px; text-align: left; font-weight: 600; font-size: 15px; }
-        .diagnostic-table td { padding: 14px 16px; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
-        .diagnostic-table tr:hover { background: #f5f5f5; }
-        .diagnostic-table tr:last-child td { border-bottom: none; }
-        
-        .badge { display: inline-block; padding: 6px 14px; border-radius: 12px; font-size: 13px; font-weight: 600; margin: 4px; }
-        .badge-red { background: #ffebee; color: #c62828; }
-        .badge-orange { background: #fff3e0; color: #ef6c00; }
-        .badge-green { background: #e8f5e9; color: #2e7d32; }
-        .badge-blue { background: #e3f2fd; color: #1565c0; }
-        .badge-purple { background: #f3e5f5; color: #7b1fa2; }
-        
-        .metal-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; }
-        @media (max-width: 768px) { .metal-comparison { grid-template-columns: 1fr; } }
-        .metal-box { padding: 20px; background: white; border-radius: 8px; border: 2px solid #e0e0e0; }
-        .metal-box.copper { border-color: #d32f2f; background: #fff3f3; }
-        .metal-box.aluminum { border-color: #ff9800; background: #fff8f0; }
-        .metal-box h5 { font-size: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        
-        .admin-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
-        .admin-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .admin-card h3 { color: #d32f2f; margin-bottom: 16px; font-size: 18px; }
-        .admin-card p { color: #757575; margin-bottom: 16px; }
-        .admin-form input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #e0e0e0; border-radius: 8px; }
-        
-        #downloadProgress { margin-top: 15px; }
-        #downloadProgressBar { background: #4caf50; height: 100%; width: 0%; transition: width 0.3s; border-radius: 8px; }
-        #downloadStatus { margin-top: 8px; font-size: 14px; color: #555; }
-        #downloadResult { margin-top: 10px; }
-        
-        .screen { display: none; }
-        .screen.active { display: block; }
-        
-        .expert-mode-banner { background: linear-gradient(135deg, #1565c0, #0d47a1); color: white; padding: 20px 28px; border-radius: 12px; margin-bottom: 28px; box-shadow: 0 4px 16px rgba(21,101,192,0.3); }
-        .expert-mode-banner h3 { font-size: 22px; margin-bottom: 10px; }
-        .expert-mode-banner p { opacity: 0.95; line-height: 1.6; }
-        
-        .temperature-scale { background: linear-gradient(to right, #2196f3, #4caf50, #ff9800, #f44336); height: 30px; border-radius: 15px; margin: 20px 0; position: relative; }
-        .temp-marker { position: absolute; top: -25px; font-size: 12px; font-weight: 600; }
-        
-        .fusion-point { background: #fff3e0; padding: 16px; border-radius: 8px; margin: 12px 0; border-left: 4px solid #ff9800; }
-        .fusion-point strong { color: #d32f2f; }
-        
-        .color-chart { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
-        .color-box { padding: 16px; border-radius: 8px; text-align: center; border: 2px solid #ddd; }
-        .color-box.natural { background: linear-gradient(135deg, #c0c0c0, #808080); color: white; }
-        .color-box.yellow { background: linear-gradient(135deg, #ffd700, #ff8c00); color: black; }
-        .color-box.brown { background: linear-gradient(135deg, #8b4513, #654321); color: white; }
-        .color-box.blue { background: linear-gradient(135deg, #4169e1, #1e3a8a); color: white; }
-        .color-box.oxidized { background: linear-gradient(135deg, #2f4f4f, #1a1a1a); color: white; }
-    </style>
+    <link rel="icon" type="image/svg+xml" href="images/icon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192x192.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="DiagIncendie">
+    <meta name="msapplication-TileColor" content="#d32f2f">
+    <meta name="msapplication-TileImage" content="images/icon-144x144.png">
+
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%23801425'/><path fill='%23ff9800' d='M256 72c12 68 84 98 92 188 4 60-28 112-92 136-64-24-96-76-92-136 4-44 32-72 50-108 6 24 22 36 24 56 14-40 8-92 18-136z'/><circle cx='308' cy='308' r='74' fill='none' stroke='%23fff' stroke-width='30'/><line x1='360' y1='360' x2='428' y2='428' stroke='%23fff' stroke-width='40' stroke-linecap='round'/></svg>">
+
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Diag incendie by Kevin v4.0</title>
 </head>
 <body>
-    <!-- ÉCRAN DE CONNEXION -->
-    <div id="loginScreen" class="screen active">
-        <div class="login-container">
-            <div class="logo">
-                <img src="images/icon-512.png" alt="FireDiag Logo">
-                <h1>FireDiag Auto</h1>
-                <p>Expert Diagnostic Incendie</p>
+    <header class="app-header">
+        <div class="header-content">
+            <img src="images/icon.svg" alt="Logo" class="header-logo" onerror="this.style.display='none'">
+            <div>
+                <h1>🔥 Diag incendie by Kevin</h1>
+                <p class="subtitle">Base technique expert incendie • NFPA 921 • Véhicules électriques</p>
             </div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="userType">Type d'accès :</label>
-                    <select id="userType" required onchange="togglePasswordFields()">
-                        <option value="">Sélectionnez...</option>
-                        <option value="admin">Expert (Administrateur)</option>
-                        <option value="tier">Tiers (accès limité)</option>
-                    </select>
-                </div>
-                <div class="form-group" id="passwordGroup" style="display:none;">
-                    <label for="password">Mot de passe :</label>
-                    <input type="password" id="password" placeholder="Entrez le mot de passe">
-                </div>
-                <div class="form-group" id="emailGroup" style="display:none;">
-                    <label for="email">Email :</label>
-                    <input type="email" id="email" placeholder="votre@email.com">
-                </div>
-                <button type="submit" class="btn-primary">Connexion</button>
-            </form>
-            <div id="loginError" class="error-message"></div>
         </div>
+    </header>
+
+    <section class="search-section">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Rechercher : thermal runaway, perles primaires, HF..." autocomplete="off">
+            <button id="searchBtn" class="btn-primary">🔍 Rechercher</button>
+            <button id="geminiSearchBtn" class="btn-secondary">🤖 IA Gemini</button>
+        </div>
+        <div id="searchResults" class="search-results"></div>
+        <div id="geminiResults" class="gemini-results"></div>
+    </section>
+
+    <div id="connectionStatus" class="connection-status online">
+        <span class="status-icon"></span><span class="status-text">En ligne</span>
     </div>
 
-    <!-- APPLICATION PRINCIPALE -->
-    <div id="appScreen" class="screen">
-        <header class="app-header">
-            <div class="header-left">
-                <button id="menuToggle" class="menu-btn">☰</button>
-                <h1>FireDiag Auto - Expert</h1>
+    <nav class="main-nav">
+        <button class="nav-btn active" data-filter="all">Tous</button>
+        <button class="nav-btn" data-filter="building">🏢 Bâtiment</button>
+        <button class="nav-btn" data-filter="electrical">⚡ Électrique</button>
+        <button class="nav-btn" data-filter="vehicle-thermal">🚗 Véhicule thermique</button>
+        <button class="nav-btn" data-filter="vehicle-electric">🔋 VE / Hybride</button>
+        <button class="nav-btn" data-filter="equipment">🧪 Chimique</button>
+    </nav>
+
+    <!-- NOUVEAU : Méthodologie NFPA 921 -->
+    <section id="section-methodology">
+        <h2>🔬 Méthodologie NFPA 921</h2>
+        <div class="method-steps" id="methodSteps"></div>
+        <h3 style="margin-top:2rem;color:#d32f2f">📐 Patterns de feu</h3>
+        <div class="patterns-grid" id="patternsGrid"></div>
+    </section>
+
+    <!-- NOUVEAU : Chimie du feu & phénomènes -->
+    <section id="section-chemistry">
+        <h2>⚗️ Chimie du feu & phénomènes</h2>
+        <h3>Tétraèdre du feu</h3>
+        <div class="tetrahedron" id="tetrahedron"></div>
+        <h3>Phénomènes dangereux</h3>
+        <div class="phenomena-grid" id="phenomenaGrid"></div>
+        <h3>Gaz toxiques</h3>
+        <div class="table-container">
+            <table class="metal-table" id="gasTable">
+                <thead><tr><th>Gaz</th><th>Source</th><th>Danger</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <h2>🎯 Sources de départ incendie</h2>
+        <div class="causes-grid" id="causesGrid"></div>
+    </section>
+
+    <!-- NOUVEAU : Véhicules thermiques détaillés -->
+    <section id="section-vehicle-thermal">
+        <h2>🚗 Véhicules thermiques (détaillé)</h2>
+        <h3>Compartiment moteur</h3>
+        <div class="causes-grid" id="engineCauses"></div>
+        <h3>Habitacle</h3>
+        <div class="causes-grid" id="cabinCauses"></div>
+    </section>
+
+    <!-- NOUVEAU : Véhicules électriques experts -->
+    <section id="section-vehicle-electric">
+        <h2>🔋 Véhicules électriques (expert)</h2>
+        <h3>Chimies de batteries</h3>
+        <div class="chem-grid" id="chemGrid"></div>
+        <h3>Thermal Runaway (emballement)</h3>
+        <div class="runaway-phases" id="runawayPhases"></div>
+        <h3>Indicateurs & extinction</h3>
+        <div class="runaway-details" id="runawayDetails"></div>
+        <h3>Causes spécifiques</h3>
+        <div class="causes-grid" id="evCauses"></div>
+    </section>
+
+    <!-- NOUVEAU : Véhicules hybrides -->
+    <section id="section-vehicle-hybrid">
+        <h2>🔄 Véhicules hybrides</h2>
+        <div id="hybridInfo"></div>
+    </section>
+
+    <!-- NOUVEAU : Bâtiments enrichi -->
+    <section id="section-buildings">
+        <h2>🏢 Bâtiments (causes détaillées)</h2>
+        <div class="causes-grid" id="buildingCauses"></div>
+        <h3>Modes de propagation</h3>
+        <div class="propagation-grid" id="propagationGrid"></div>
+    </section>
+
+    <!-- NOUVEAU : Chimique -->
+    <section id="section-chemical">
+        <h2>🧪 Chimique</h2>
+        <h3>Auto-inflammation</h3>
+        <div class="table-container">
+            <table class="metal-table" id="selfIgnitionTable">
+                <thead><tr><th>Matériau</th><th>T° auto-infl.</th><th>Mécanisme</th><th>Prévention</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <h3>Incompatibilités chimiques</h3>
+        <div id="incompatibilities"></div>
+    </section>
+
+    <section>
+        <h2>🌡️ Points de fusion des métaux</h2>
+        <div class="table-container">
+            <table id="metalTable" class="metal-table">
+                <thead><tr><th>Métal</th><th>°C</th><th>°F</th><th>Aspect après feu</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <h2>🔌 Analyse des fils électriques (ASTM E2929)</h2>
+        <div class="analysis-grid" id="wireAnalysisGrid"></div>
+    </section>
+
+    <section>
+        <h2>🔩 Identification sur métal</h2>
+        <div class="identification-cards" id="metalIdGrid"></div>
+    </section>
+
+    <section>
+        <h2>📷 Galerie photos par cas</h2>
+        <div class="gallery-grid" id="photoGallery"></div>
+    </section>
+
+    <section class="storage-info">
+        <div class="storage-card">
+            <h3>💾 Base de données locale v4.0</h3>
+            <p id="storageStatus">Initialisation...</p>
+            <button id="offlinePhotosBtn" class="btn-offline">📥 Rendre les photos disponibles hors ligne</button>
+            <p id="offlineProgress" class="offline-progress"></p>
+            <div class="storage-stats">
+                <div class="stat"><span class="stat-label">Causes</span><span class="stat-value" id="casesCount">0</span></div>
+                <div class="stat"><span class="stat-label">Photos</span><span class="stat-value" id="photosCount">0</span></div>
+                <div class="stat"><span class="stat-label">Métaux</span><span class="stat-value" id="metalsCount">0</span></div>
+                <div class="stat"><span class="stat-label">Patterns</span><span class="stat-value" id="patternsCount">0</span></div>
             </div>
-            <div class="header-right">
-                <span id="connectionStatus" class="status-indicator">● Online</span>
-                <button id="logoutBtn" class="btn-logout">Déconnexion</button>
-            </div>
-        </header>
+        </div>
+    </section>
 
-        <nav id="sideMenu" class="side-menu">
-            <div class="menu-header">
-                <h3>Menu Expert</h3>
-                <button id="closeMenu" class="close-btn">×</button>
-            </div>
-            <ul class="menu-items">
-                <li><a href="#" onclick="showSection('accueil')" id="link-accueil" class="active">🏠 Accueil</a></li>
-                <li><a href="#" onclick="showSection('incendie-electrique')" id="link-incendie-electrique"> Incendies Électriques</a></li>
-                <li><a href="#" onclick="showSection('incendie-mecanique')" id="link-incendie-mecanique">🔥 Incendies Mécaniques</a></li>
-                <li><a href="#" onclick="showSection('incendie-roulant')" id="link-incendie-roulant">🚗 Incendies en Roulant</a></li>
-                <li><a href="#" onclick="showSection('analyse-tôles')" id="link-analyse-tôles">🎨 Analyse Tôles & Couleurs</a></li>
-                <li><a href="#" onclick="showSection('batteries')" id="link-batteries"> Batteries HT/BT</a></li>
-                <li><a href="#" onclick="showSection('cables-cosses')" id="link-cables-cosses">🔌 Câbles & Cosses</a></li>
-                <li><a href="#" onclick="showSection('feux-criminels')" id="link-feux-criminels">🚨 Feux Criminels</a></li>
-                <li><a href="#" onclick="showSection('recherche-ia')" id="link-recherche-ia">🤖 Recherche IA</a></li>
-                <li id="adminMenu" style="display:none;"><a href="#" onclick="showSection('admin')" id="link-admin">⚙️ Administration</a></li>
-            </ul>
-        </nav>
+    <footer class="app-footer">
+        <p>© 2026 Diag incendie by Kevin - Base expert incendie</p>
+        <p class="version">v4.0 - NFPA 921 • ENFSI • DGSCGC • NIST • ASTM E2929</p>
+        <p class="version">Android 🤖 • Windows 🪟 • Apple 🍎</p>
+    </footer>
 
-        <div id="overlay" class="overlay"></div>
-
-        <main class="main-content">
-            <!-- ACCUEIL -->
-            <section id="accueil" class="section active">
-                <div class="expert-mode-banner">
-                    <h3>🔥 Mode Expert Sapeur-Pompier</h3>
-                    <p>Fiches techniques détaillées niveau expert pour l'investigation des départs d'incendie sur véhicules automobiles, poids lourds et véhicules électriques. Analyses métallurgiques, perlages, fusion cuivre/aluminium, températures critiques, analyse des couleurs de tôles.</p>
-                </div>
-                <div class="welcome-card">
-                    <h2>FireDiag Auto - Expert Diagnostic</h2>
-                    <p>Application d'investigation incendie automobile - 10+ photos par thème, analyses techniques approfondies, tableaux comparatifs, procédures d'expertise, détermination origine du feu</p>
-                </div>
-                <div class="features-grid">
-                    <div class="feature-card" onclick="showSection('incendie-electrique')">
-                        <div class="feature-icon">⚡</div>
-                        <h3>Incendies Électriques</h3>
-                        <p>Court-circuit, surchauffe, surcharge, arcs électriques, perlages cuivre</p>
-                    </div>
-                    <div class="feature-card" onclick="showSection('incendie-mecanique')">
-                        <div class="feature-icon"></div>
-                        <h3>Incendies Mécaniques</h3>
-                        <p>Fuites échappement, turbo, FAP, points chauds >1000°C</p>
-                    </div>
-                    <div class="feature-card" onclick="showSection('incendie-roulant')">
-                        <div class="feature-icon">🚗</div>
-                        <h3>Incendies en Roulant</h3>
-                        <p>Roulements, freins, transmission, courroies</p>
-                    </div>
-                    <div class="feature-card" onclick="showSection('analyse-tôles')">
-                        <div class="feature-icon">🎨</div>
-                        <h3>Analyse Tôles & Couleurs</h3>
-                        <p>Détermination origine feu par couleur tôles</p>
-                    </div>
-                    <div class="feature-card" onclick="showSection('batteries')">
-                        <div class="feature-icon">🔋</div>
-                        <h3>Batteries</h3>
-                        <p>Batteries 12V/24V et haute tension VE</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- INCENDIE ÉLECTRIQUE -->
-            <section id="incendie-electrique" class="section">
-                <h2>⚡ Départs d'Incendie Électriques</h2>
-                
-                <div class="section-intro">
-                    <p><strong>Objectif expert :</strong> Identifier l'origine électrique par l'analyse métallurgique des traces de fusion, perlages, cristallisation du cuivre et de l'aluminium. Détermination des températures atteintes (>1085°C pour Cu, >660°C pour Al).</p>
-                </div>
-
-                <div class="fiche-container">
-                    <!-- COURT-CIRCUIT -->
-                    <div class="fiche" id="fiche-court-circuit">
-                        <h3>Court-Circuit Électrique - Analyse Métallurgique</h3>
-                        
-                        <div class="fiche-section">
-                            <h4>Mécanisme Physique Détaillé</h4>
-                            <p>Un court-circuit franc crée un arc électrique avec température locale de 3000-6000°C (supérieure au point de fusion du cuivre à 1085°C). Le cuivre fond instantanément, formant des <strong>perles de fusion</strong> caractéristiques. L'aluminium fond à 660°C et présente des perlages différents.</p>
-                        </div>
-
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <div class="image-gallery">
-                                    <img id="img-cc-1" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="CC1">
-                                    <p class="image-legend">Fig. 1A : Perles de cuivre figées (fusion >1085°C)</p>
-                                    <img id="img-cc-2" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="CC2">
-                                    <p class="image-legend">Fig. 1B : Arc électrique et projection métal</p>
-                                    <img id="img-cc-3" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="CC3">
-                                    <p class="image-legend">Fig. 1C : Carbonisation isolation</p>
-                                    <img id="img-cc-4" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="CC4">
-                                    <p class="image-legend">Fig. 1D : Fusion cuivre localisée</p>
-                                    <img id="img-cc-5" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="CC5">
-                                    <p class="image-legend">Fig. 1E : Cristallisation cuivre</p>
-                                    <img id="img-cc-6" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="CC6">
-                                    <p class="image-legend">Fig. 1F : Point d'origine arc</p>
-                                </div>
-                            </div>
-                            <div class="fiche-info">
-                                <div class="fiche-section">
-                                    <h4>Causes Techniques Détaillées</h4>
-                                    <ul>
-                                        <li><strong>Usure mécanique :</strong> Frottement câble/carrosserie sur 10 000+ km → isolation usée jusqu'au cuivre nu</li>
-                                        <li><strong>Dégradation isolation :</strong> Vieillissement thermique (>105°C prolongé), ozone, UV, hydrocarbures</li>
-                                        <li><strong>Humidité :</strong> Infiltration eau dans connecteurs → corrosion galvanique → résistance → feu</li>
-                                        <li><strong>Rongeurs :</strong> Dégâts souris sur faisceaux moteur (isolation mangée)</li>
-                                        <li><strong>Intervention incorrecte :</strong> Perçage carrosserie, ajout accessoires (section inadaptée)</li>
-                                        <li><strong>Serrage insuffisant :</strong> Cosses desserrées par vibrations → résistance de contact → échauffement</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Signes Visibles d'Investigation Expert</h4>
-                                    <ul>
-                                        <li><span class="badge badge-red">Perles cuivre</span> Sphères de cuivre figées (température >1085°C) - signature court-circuit</li>
-                                        <li><span class="badge badge-red">Arc électrique</span> Marques en étoile, projection métal vaporisé (cuivre/aluminium)</li>
-                                        <li><span class="badge badge-orange">Carbonisation</span> Isolation noire friable, odeur âcre caractéristique</li>
-                                        <li><span class="badge badge-orange">Point d'origine</span> Dégâts maximum au point de contact (règle du cône)</li>
-                                        <li><span class="badge badge-blue">Propagation</span> Dégâts décroissants depuis le point de court-circuit</li>
-                                        <li><span class="badge badge-purple">Cristallisation</span> Structure cristalline du cuivre modifiée par fusion rapide</li>
-                                    </ul>
-                                </div>
-
-                                <div class="metal-comparison">
-                                    <div class="metal-box copper">
-                                        <h5>🔴 Cuivre (Cu)</h5>
-                                        <ul>
-                                            <li><strong>Fusion :</strong> 1085°C</li>
-                                            <li><strong>Perles :</strong> Sphériques, brillantes</li>
-                                            <li><strong>Couleur :</strong> Rouge/orange fondu</li>
-                                            <li><strong>Densité :</strong> 8.96 g/cm³</li>
-                                            <li><strong>Résistivité :</strong> 1.68×10⁸ Ω·m</li>
-                                        </ul>
-                                    </div>
-                                    <div class="metal-box aluminum">
-                                        <h5> Aluminium (Al)</h5>
-                                        <ul>
-                                            <li><strong>Fusion :</strong> 660°C</li>
-                                            <li><strong>Perles :</strong> Irrégulières, mates</li>
-                                            <li><strong>Couleur :</strong> Gris/blanc fondu</li>
-                                            <li><strong>Densité :</strong> 2.70 g/cm³</li>
-                                            <li><strong>Résistivité :</strong> 2.82×10⁻⁸ Ω·m</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="fiche-section">
-                            <h4>Méthodologie d'Investigation Expert</h4>
-                            <ol>
-                                <li><strong>Localiser le point d'origine :</strong> Rechercher la fusion la plus importante (règle du cône de chaleur)</li>
-                                <li><strong>Analyser le type de fusion :</strong> 
-                                    <ul>
-                                        <li>Fusion instantanée avec perles = court-circuit franc</li>
-                                        <li>Fusion progressive sans perles = surchauffe</li>
-                                        <li>Perles aluminium (660°C) vs perles cuivre (1085°C)</li>
-                                    </ul>
-                                </li>
-                                <li><strong>Vérifier la polarité :</strong> Le conducteur positif est généralement le plus affecté</li>
-                                <li><strong>Rechercher la cause :</strong> Usure, intervention, défaut fabrication, rongeurs</li>
-                                <li><strong>Mesurer l'isolement :</strong> Résistance >1 MΩ sur circuit sain (mégohmmètre 500V)</li>
-                                <li><strong>Prélèvement :</strong> Conserver échantillons pour analyse métallographique si besoin</li>
-                            </ol>
-                        </div>
-
-                        <div class="warning-box danger">
-                            <strong>⚠️ Point Critique Expert :</strong> Un court-circuit peut persister après l'extinction si la batterie n'est pas déconnectée. Risque de reprise de feu immédiat. Toujours déconnecter batterie avant investigation.
-                        </div>
-
-                        <div class="fiche-section">
-                            <h4>Diagnostic Différentiel Détaillé</h4>
-                            <table class="diagnostic-table">
-                                <thead>
-                                    <tr>
-                                        <th>Caractéristique</th>
-                                        <th>Court-Circuit</th>
-                                        <th>Surchauffe</th>
-                                        <th>Surcharge</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Température</td>
-                                        <td>>1085°C (fusion Cu)</td>
-                                        <td>150-300°C</td>
-                                        <td>100-200°C</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Vitesse</td>
-                                        <td>Instantané (millisecondes)</td>
-                                        <td>Progressif (minutes/heures)</td>
-                                        <td>Lent (heures/jours)</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Perles métal</td>
-                                        <td>Oui, sphériques Cu/Al</td>
-                                        <td>Non</td>
-                                        <td>Non</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Isolation</td>
-                                        <td>Carbonisée localement</td>
-                                        <td>Durcie sur longueur</td>
-                                        <td>Soufflée uniformément</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Fusible</td>
-                                        <td>Grillé (explosé)</td>
-                                        <td>Souvent intact</td>
-                                        <td>Grillé (fondu lent)</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Zone affectée</td>
-                                        <td>Localisée (cm)</td>
-                                        <td>Étendue (dizaines cm)</td>
-                                        <td>Circuit complet</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- SURCHAUFFE -->
-                    <div class="fiche" id="fiche-surchauffe">
-                        <h3>Surchauffe Électrique - Effet Joule</h3>
-                        
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <div class="image-gallery">
-                                    <img id="img-sh-1" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="SH1">
-                                    <p class="image-legend">Fig. 2A : Connecteur oxydé échauffé</p>
-                                    <img id="img-sh-2" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="SH2">
-                                    <p class="image-legend">Fig. 2B : Isolation craquelée chaleur</p>
-                                    <img id="img-sh-3" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="SH3">
-                                    <p class="image-legend">Fig. 2C : Durcissement isolation</p>
-                                    <img id="img-sh-4" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="SH4">
-                                    <p class="image-legend">Fig. 2D : Déformation plastique</p>
-                                    <img id="img-sh-5" src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="SH5">
-                                    <p class="image-legend">Fig. 2E : Oxydation cosses</p>
-                                    <img id="img-sh-6" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="SH6">
-                                    <p class="image-legend">Fig. 2F : Gradient température</p>
-                                </div>
-                            </div>
-                            <div class="fiche-info">
-                                <div class="fiche-section">
-                                    <h4>Mécanisme Physique Détaillé</h4>
-                                    <p>La surchauffe résulte d'une résistance anormale au passage du courant selon la loi de Joule : <strong>P = R × I²</strong>. Un mauvais contact multiplie la résistance par 10 à 100 (de 10 mΩ à 1-10 Ω), générant une chaleur localisée excessive : P = 1Ω × (20A)² = 400W !</p>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Causes Techniques Détaillées</h4>
-                                    <ul>
-                                        <li><strong>Mauvais contact :</strong> Cosses oxydées (vert-de-gris Cu₂CO₃(OH)₂), desserrées, mal serties → résistance ×100</li>
-                                        <li><strong>Sous-dimensionnement :</strong> Section câble insuffisante pour l'intensité (ex: 1mm² pour 20A au lieu de 4mm²)</li>
-                                        <li><strong>Résistance de contact :</strong> >50 mΩ au lieu de <10 mΩ normal (norme automobile)</li>
-                                        <li><strong>Ventilation bloquée :</strong> Calculateur, alternateurs surchauffés par manque d'air</li>
-                                        <li><strong>Ambiance thermique :</strong> Proximité échappement (>150°C ambiant)</li>
-                                        <li><strong>Vieillissement :</strong> Relaxation contrainte cosses après 5-10 ans</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Signes Caractéristiques Experts</h4>
-                                    <ul>
-                                        <li><span class="badge badge-orange">Isolation</span> Durcie, craquelée, changement couleur (brun → noir) sur longueur</li>
-                                        <li><span class="badge badge-orange">Déformation</span> Connecteurs plastiques fondus localement (PE à 120°C, PA à 180°C)</li>
-                                        <li><span class="badge badge-red">Oxydation</span> Vert-de-gris sur cosses cuivre (Cu₂CO₃(OH)₂) - résistance ×100</li>
-                                        <li><span class="badge badge-blue">Odeur</span> Plastique brûlé, âcre caractéristique (PVC, PE)</li>
-                                        <li><span class="badge badge-blue">Point chaud</span> Température >150°C mesurable au pyromètre IR</li>
-                                        <li><span class="badge badge-purple">Gradient</span> Température décroissante depuis point chaud (contrairement CC)</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="warning-box info">
-                            <strong>🔍 Indice Expert :</strong> La surchauffe laisse des traces sur plusieurs centimètres voire dizaines de cm (contrairement au court-circuit très localisé sur 1-2 cm). Rechercher un gradient de température décroissant depuis le point chaud.
-                        </div>
-
-                        <div class="fusion-point">
-                            <strong>Points de Fusion Matériaux :</strong><br>
-                            • Cuivre (Cu) : 1085°C<br>
-                            • Aluminium (Al) : 660°C<br>
-                            • Plomb (Pb) : 327°C<br>
-                            • Étain (Sn) : 232°C<br>
-                            • PVC isolation : 100-260°C (décomposition)<br>
-                            • Polyéthylène : 120°C (fusion)<br>
-                            • Polyamide : 180-220°C (fusion)
-                        </div>
-                    </div>
-
-                    <!-- SURCHARGE -->
-                    <div class="fiche" id="fiche-surcharge">
-                        <h3>Surcharge Électrique - Surintensité</h3>
-                        
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <div class="image-gallery">
-                                    <img id="img-sc-1" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="SC1">
-                                    <p class="image-legend">Fig. 3A : Fusible fondu surcharge</p>
-                                    <img id="img-sc-2" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="SC2">
-                                    <p class="image-legend">Fig. 3B : Batterie gonflée gaz H₂</p>
-                                    <img id="img-sc-3" src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="SC3">
-                                    <p class="image-legend">Fig. 3C : Alternateur surchauffe</p>
-                                    <img id="img-sc-4" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="SC4">
-                                    <p class="image-legend">Fig. 3D : Câbles surchauffés</p>
-                                    <img id="img-sc-5" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="SC5">
-                                    <p class="image-legend">Fig. 3E : Isolant soufflé</p>
-                                    <img id="img-sc-6" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="SC6">
-                                    <p class="image-legend">Fig. 3F : Boîtier fusibles</p>
-                                </div>
-                            </div>
-                            <div class="fiche-info">
-                                <div class="fiche-section">
-                                    <h4>Définition Technique</h4>
-                                    <p>La surcharge se produit lorsque la consommation totale dépasse la capacité du circuit ou de l'alternateur. Le système est sollicité au-delà de ses limites nominales pendant une durée prolongée (heures).</p>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Scénarios Typiques Détaillés</h4>
-                                    <ul>
-                                        <li><strong>Ajout équipements :</strong> Amplificateur audio 1000W sur circuit 12V/100A → I = P/U = 1000/12 = 83A (proche limite)</li>
-                                        <li><strong>Alternateur défectueux :</strong> Régulation HS → surtension 16-18V (au lieu de 14V) → surcharge batterie</li>
-                                        <li><strong>Batterie HS :</strong> Résistance interne élevée (>50 mΩ) → échauffement charge (P = R×I²)</li>
-                                        <li><strong>Masse véhicule :</strong> Câble masse corrodé → résistance globale circuit → échauffement généralisé</li>
-                                        <li><strong>Démarrage répété :</strong> Courant 400A × 10 démarrages = échauffement câbles batterie</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Investigation Expert</h4>
-                                    <ol>
-                                        <li><strong>Mesurer tension batterie :</strong> 
-                                            <ul>
-                                                <li>Moteur arrêté : 12.6V nominal (11.8V = batterie déchargée)</li>
-                                                <li>Moteur tournant : 13.8-14.4V (alternateur OK)</li>
-                                                <li>>15V = régulateur alternateur HS (surcharge)</li>
-                                                <li><13.5V = alternateur faible (sous-charge)</li>
-                                            </ul>
-                                        </li>
-                                        <li><strong>Mesurer consommation :</strong> Pince ampèremétrique sur câble batterie
-                                            <ul>
-                                                <li>Véhicule arrêté : <50mA (veille normale)</li>
-                                                <li>50-200mA = fuite modérée (recherche circuit)</li>
-                                                <li>>200mA = fuite importante (risque batterie vide)</li>
-                                            </ul>
-                                        </li>
-                                        <li><strong>Vérifier fusibles :</strong> Calibrage respecté ? (ex: 15A sur circuit allume-cigare)
-                                            <ul>
-                                                <li>Fusible fondu lent = surcharge prolongée</li>
-                                                <li>Fusible explosé = court-circuit</li>
-                                            </ul>
-                                        </li>
-                                        <li><strong>Contrôler alternateur :</strong> Débit nominal (ex: 120A) vs consommation totale</li>
-                                    </ol>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="warning-box success">
-                            <strong>✅ Bon à Savoir :</strong> Un alternateur de 120A peut fournir en continu 120A × 14V = 1680W. Si les équipements consomment 2000W, l'alternateur surchauffe et la batterie se décharge (I = 2000/14 = 143A > 120A).
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- INCENDIE MÉCANIQUE -->
-            <section id="incendie-mecanique" class="section">
-                <h2>🔥 Départs d'Incendie Mécaniques</h2>
-                
-                <div class="section-intro">
-                    <p><strong>Objectif expert :</strong> Identifier les départs de feu d'origine mécanique par contact fluide inflammable/surface chaude. Analyse des températures de points chauds (400-1000°C) et des points éclair des fluides.</p>
-                </div>
-
-                <div class="fiche-container">
-                    <!-- ÉCHAPPEMENT -->
-                    <div class="fiche" id="fiche-echappement">
-                        <h3>Fuites de Fluides sur Surfaces Chaudes</h3>
-                        
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <div class="image-gallery">
-                                    <img id="img-ech-1" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Ech1">
-                                    <p class="image-legend">Fig. 4A : Fuite huile sur turbo</p>
-                                    <img id="img-ech-2" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="Ech2">
-                                    <p class="image-legend">Fig. 4B : Collecteur échappement 800°C</p>
-                                    <img id="img-ech-3" src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Ech3">
-                                    <p class="image-legend">Fig. 4C : Traces suie et dépôts</p>
-                                    <img id="img-ech-4" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Ech4">
-                                    <p class="image-legend">Fig. 4D : Durite huile fissurée</p>
-                                    <img id="img-ech-5" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Ech5">
-                                    <p class="image-legend">Fig. 4E : Joint collecteur HS</p>
-                                    <img id="img-ech-6" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Ech6">
-                                    <p class="image-legend">Fig. 4F : Inflammation instantanée</p>
-                                    <img id="img-ech-7" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Ech7">
-                                    <p class="image-legend">Fig. 4G : Carbonisation autour</p>
-                                    <img id="img-ech-8" src="https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800" alt="Ech8">
-                                    <p class="image-legend">Fig. 4H : Projection huile</p>
-                                </div>
-                            </div>
-                            <div class="fiche-info">
-                                <div class="fiche-section">
-                                    <h4>Points Chauds Critiques - Températures</h4>
-                                    <table class="diagnostic-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Composant</th>
-                                                <th>Température</th>
-                                                <th>Risque</th>
-                                                <th>Auto-inflammation</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Collecteur échappement</td>
-                                                <td>400-900°C</td>
-                                                <td><span class="badge badge-red">Extrême</span></td>
-                                                <td>>250°C</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Turbocompresseur</td>
-                                                <td>800-1000°C</td>
-                                                <td><span class="badge badge-red">Extrême</span></td>
-                                                <td>>250°C</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Catalyseur/FAP</td>
-                                                <td>600-800°C</td>
-                                                <td><span class="badge badge-orange">Élevé</span></td>
-                                                <td>>250°C</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Ligne échappement</td>
-                                                <td>200-500°C</td>
-                                                <td><span class="badge badge-orange">Élevé</span></td>
-                                                <td>>250°C</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Bloc moteur</td>
-                                                <td>90-120°C</td>
-                                                <td><span class="badge badge-blue">Modéré</span></td>
-                                                <td>>250°C</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Fluides Inflammables - Points Éclair</h4>
-                                    <ul>
-                                        <li><strong>Huile moteur :</strong> Point éclair >200°C, auto-inflammation 250-300°C</li>
-                                        <li><strong>Essence :</strong> Point éclair -40°C (très dangereux), auto-inflammation 280°C</li>
-                                        <li><strong>Gasoil :</strong> Point éclair >55°C, auto-inflammation 210°C</li>
-                                        <li><strong>Liquide direction :</strong> ATF, point éclair 150-200°C</li>
-                                        <li><strong>Liquide transmission :</strong> ATF, similaire direction</li>
-                                        <li><strong>Liquide frein :</strong> DOT 4, point éclair >150°C (hygroscopique)</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Méthodologie d'Investigation</h4>
-                                    <ol>
-                                        <li><strong>Rechercher traces de suie :</strong> Dépôts noirs sur échappement (combustion incomplète huile/carburant)</li>
-                                        <li><strong>Identifier dépôts huileux :</strong> Aspect brillant, odeur caractéristique, toucher gras</li>
-                                        <li><strong>Localiser fuite :</strong> Remontée depuis point bas vers point chaud (gravité)</li>
-                                        <li><strong>Vérifier joints :</strong> Joint collecteur (fuite externe), joint turbo (huile), durites fissurées</li>
-                                        <li><strong>Tester avec spray :</strong> Spray détecteur de fuites (mousse révélatrice)</li>
-                                        <li><strong>Analyser propagation :</strong> Sens du feu depuis point d'inflammation</li>
-                                    </ol>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="warning-box danger">
-                            <strong>⚠️ Danger Immédiat :</strong> Une fuite d'huile sur turbo à 1000°C s'enflamme instantanément (point éclair huile ~200°C << 1000°C). Ne jamais ouvrir le capot sur un moteur très chaud avec fuite visible. Risque d'embrasement immédiat.
-                        </div>
-
-                        <div class="fiche-section">
-                            <h4>Mécanisme d'Inflammation</h4>
-                            <p>L'huile qui goutte sur un collecteur à 800°C se vaporise instantanément et s'enflamme (température >> point éclair). Le feu se propage aux plastiques environnants (température inflammation plastique ~350-450°C).</p>
-                        </div>
-                    </div>
-
-                    <!-- FAP -->
-                    <div class="fiche" id="fiche-fap">
-                        <h3>Filtre à Particules (FAP/DPF) - Surchauffe</h3>
-                        
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <div class="image-gallery">
-                                    <img id="img-fap-1" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="FAP1">
-                                    <p class="image-legend">Fig. 5A : FAP encrassé suie</p>
-                                    <img id="img-fap-2" src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="FAP2">
-                                    <p class="image-legend">Fig. 5B : FAP fissuré surchauffe</p>
-                                    <img id="img-fap-3" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="FAP3">
-                                    <p class="image-legend">Fig. 5C : FAP en fusion</p>
-                                    <img id="img-fap-4" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="FAP4">
-                                    <p class="image-legend">Fig. 5D : Régénération</p>
-                                    <img id="img-fap-5" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="FAP5">
-                                    <p class="image-legend">Fig. 5E : Colmatage suie</p>
-                                    <img id="img-fap-6" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="FAP6">
-                                    <p class="image-legend">Fig. 5F : Température >800°C</p>
-                                    <img id="img-fap-7" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="FAP7">
-                                    <p class="image-legend">Fig. 5G : Propagation chaleur</p>
-                                    <img id="img-fap-8" src="https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800" alt="FAP8">
-                                    <p class="image-legend">Fig. 5H : Dégâts périphériques</p>
-                                </div>
-                            </div>
-                            <div class="fiche-info">
-                                <div class="fiche-section">
-                                    <h4>Mécanisme de Régénération Détaillé</h4>
-                                    <p>Le FAP piège les particules de suie (carbone). Tous les 400-800 km, une régénération brûle la suie à 600-650°C par injection post-combustion. Si la régénération échoue (trajets courts <20km), le FAP s'encrasse et la température monte à 800-1000°C lors des tentatives de régénération.</p>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Signes Avant-Coureurs</h4>
-                                    <ul>
-                                        <li><strong>Témoin FAP :</strong> Allumé tableau de bord (encrassement >75%)</li>
-                                        <li><strong>Perte puissance :</strong> Contre-pression échappement >200 mbar (normal <100 mbar)</li>
-                                        <li><strong>Surconsommation :</strong> +2-3L/100km (régénérations fréquentes injectent du carburant)</li>
-                                        <li><strong>Fumées :</strong> Fumées bleues/grises à l'échappement (huile brûlée)</li>
-                                        <li><strong>Odeur :</strong> Odeur chaud brûlé dans l'habitacle (chaleur rayonnante)</li>
-                                        <li><strong>Régime moteur :</strong> Limité à 3000 tr/min (mode dégradé)</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Risques d'Incendie Détaillés</h4>
-                                    <ul>
-                                        <li><span class="badge badge-red">Température extrême</span> >800°C sur FAP bloqué (fusion céramique à 1200°C)</li>
-                                        <li><span class="badge badge-red">Propagation</span> Chaleur rayonnante sur plastiques (inflammation à 350°C), câbles (fusion à 150°C)</li>
-                                        <li><span class="badge badge-orange">Fissuration</span> FAP fissuré → flammèches visibles, suie projetée</li>
-                                        <li><span class="badge badge-orange">Capteurs HS</span> Sonde température HS → pas d'alerte calculateur</li>
-                                        <li><span class="badge badge-blue">Incendie garage</span> FAP reste rouge incandescent 30-60 min après coupure</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Investigation Post-Incendie</h4>
-                                    <ol>
-                                        <li><strong>Vérifier état FAP :</strong> 
-                                            <ul>
-                                                <li>FAP intact = régénération normale</li>
-                                                <li>FAP fissuré/fondu = surchauffe >1000°C</li>
-                                                <li>FAP colmaté suie = régénération bloquée (trajets courts)</li>
-                                            </ul>
-                                        </li>
-                                        <li><strong>Analyser calculateur :</strong> Lire défauts (régénérations échouées, nombre tentatives)</li>
-                                        <li><strong>Vérifier proximité :</strong> Câbles, plastiques à <10cm du FAP (distance sécurité >15cm)</li>
-                                        <li><strong>Contrôler capteurs :</strong> Sondes température amont/aval FAP fonctionnelles?</li>
-                                    </ol>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="warning-box info">
-                            <strong> Point Expert :</strong> Un FAP en surchauffe reste rouge incandescent pendant 30-60 minutes après coupure moteur. C'est une cause fréquente d'incendie garage (véhicule garé sur carton, herbe sèche, bois).
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- INCENDIE EN ROULANT -->
-            <section id="incendie-roulant" class="section">
-                <h2> Départs d'Incendie en Roulant</h2>
-                
-                <div class="section-intro">
-                    <p><strong>Objectif expert :</strong> Identifier les départs de feu liés au mouvement du véhicule : échauffement roulements, freinage intense, transmission, courroies. Ces incendies surviennent généralement après un trajet long (>30km) ou un effort intense (montée, remorque).</p>
-                </div>
-
-                <div class="fiche-container">
-                    <!-- ROULEMENTS -->
-                    <div class="fiche" id="fiche-roulements">
-                        <h3>Roulements de Roues - Échauffement</h3>
-                        
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <div class="image-gallery">
-                                    <img id="img-roul-1" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Roul1">
-                                    <p class="image-legend">Fig. 6A : Roulement grippé</p>
-                                    <img id="img-roul-2" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Roul2">
-                                    <p class="image-legend">Fig. 6B : Moyeu surchauffé</p>
-                                    <img id="img-roul-3" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Roul3">
-                                    <p class="image-legend">Fig. 6C : Graisse carbonisée</p>
-                                    <img id="img-roul-4" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Roul4">
-                                    <p class="image-legend">Fig. 6D : Roue brûlée</p>
-                                    <img id="img-roul-5" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="Roul5">
-                                    <p class="image-legend">Fig. 6E : Pneumatique fondu</p>
-                                    <img id="img-roul-6" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Roul6">
-                                    <p class="image-legend">Fig. 6F : Étrier frein collé</p>
-                                    <img id="img-roul-7" src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Roul7">
-                                    <p class="image-legend">Fig. 6G : Température >300°C</p>
-                                    <img id="img-roul-8" src="https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800" alt="Roul8">
-                                    <p class="image-legend">Fig. 6H : Fusion plastique</p>
-                                    <img id="img-roul-9" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Roul9">
-                                    <p class="image-legend">Fig. 6I : Passage roue brûlé</p>
-                                    <img id="img-roul-10" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="Roul10">
-                                    <p class="image-legend">Fig. 6J : Comparaison roue saine/brûlée</p>
-                                </div>
-                            </div>
-                            <div class="fiche-info">
-                                <div class="fiche-section">
-                                    <h4>Mécanisme d'Échauffement</h4>
-                                    <p>Un roulement de roue mal réglé (précontrainte excessive) ou défectueux (billes usées, manque graisse) génère un frottement intense. La température peut monter à 200-400°C, suffisant pour enflammer la graisse (point éclair ~200°C), le pneumatique (~400°C) et les plastiques environnants.</p>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Causes Techniques</h4>
-                                    <ul>
-                                        <li><strong>Serrage excessif :</strong> Couple de serrage roue trop élevé (>120 Nm au lieu de 100 Nm)</li>
-                                        <li><strong>Réglage jeu :</strong> Jeu axial roulement incorrect (trop serré)</li>
-                                        <li><strong>Graisse HS :</strong> Graisse vieillie, contaminée eau/poussière → lubrification insuffisante</li>
-                                        <li><strong>Étanchéité :</strong> Joint spi défectueux → eau/poussière dans roulement</li>
-                                        <li><strong>Usure :</strong> Billes/chemin de roulement usés (>150 000 km)</li>
-                                        <li><strong>Étrier collé :</strong> Étrier frein bloqué → frottement permanent plaquettes/disque</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Signes Caractéristiques</h4>
-                                    <ul>
-                                        <li><span class="badge badge-red">Température</span> Roue brûlante au toucher (>80°C après trajet normal)</li>
-                                        <li><span class="badge badge-red">Odeur</span> Odeur brûlé intense (caoutchouc, graisse)</li>
-                                        <li><span class="badge badge-orange">Bruit</span> Ronflement sourd augmentant avec vitesse (roulement HS)</li>
-                                        <li><span class="badge badge-orange">Fumée</span> Fumée blanche/grise depuis roue (graisses brûlée)</li>
-                                        <li><span class="badge badge-blue">Pneumatique</span> Flanc pneumatique fondu, cloqué (~400°C)</li>
-                                        <li><span class="badge badge-blue">Plastiques</span> Passage de roue, garde-boue fondus (~150°C)</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Investigation</h4>
-                                    <ol>
-                                        <li><strong>Mesurer température :</strong> Pyromètre IR sur moyeu (normal <60°C, anormal >100°C)</li>
-                                        <li><strong>Vérifier rotation :</strong> Roue bloquée ou dure à tourner (étrier collé ou roulement grippé)</li>
-                                        <li><strong>Contrôler roulement :</strong> Jeu axial/latéral (doit être quasi nul)</li>
-                                        <li><strong>Analyser graisse :</strong> Graisse noire, sèche, contaminée (normale : grise/onctueuse)</li>
-                                        <li><strong>Vérifier freins :</strong> Étrier libre, plaquettes non collées</li>
-                                    </ol>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="warning-box danger">
-                            <strong>⚠️ Danger :</strong> Un roulement en surchauffe peut atteindre 400°C en 30 minutes de roulage. Risque d'inflammation pneumatique (caoutchouc ~400°C) et propagation au passage de roue. Arrêt immédiat du véhicule requis.
-                        </div>
-
-                        <div class="fusion-point">
-                            <strong>Températures Critiques :</strong><br>
-                            • Graisse roulement : 150-200°C (décomposition)<br>
-                            • Pneumatique : 350-400°C (inflammation)<br>
-                            • Plastique passage roue : 150-200°C (fusion)<br>
-                            • Étrier frein : 300-500°C (freinage intense)<br>
-                            • Disque frein : 600-800°C (freinage prolongé)
-                        </div>
-                    </div>
-
-                    <!-- FREINAGE -->
-                    <div class="fiche" id="fiche-freinage">
-                        <h3>Freinage Intense - Surchauffe</h3>
-                        
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <div class="image-gallery">
-                                    <img id="img-frein-1" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Frein1">
-                                    <p class="image-legend">Fig. 7A : Disque frein surchauffé</p>
-                                    <img id="img-frein-2" src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Frein2">
-                                    <p class="image-legend">Fig. 7B : Plaquettes brûlées</p>
-                                    <img id="img-frein-3" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Frein3">
-                                    <p class="image-legend">Fig. 7C : Étrier déformé</p>
-                                    <img id="img-frein-4" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Frein4">
-                                    <p class="image-legend">Fig. 7D : Liquide frein ébullition</p>
-                                    <img id="img-frein-5" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Frein5">
-                                    <p class="image-legend">Fig. 7E : Perte efficacité</p>
-                                    <img id="img-frein-6" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Frein6">
-                                    <p class="image-legend">Fig. 7F : Fumée freinage</p>
-                                    <img id="img-frein-7" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="Frein7">
-                                    <p class="image-legend">Fig. 7G : Inflammation</p>
-                                    <img id="img-frein-8" src="https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800" alt="Frein8">
-                                    <p class="image-legend">Fig. 7H : Roue complète brûlée</p>
-                                    <img id="img-frein-9" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Frein9">
-                                    <p class="image-legend">Fig. 7I : Comparaison sain/brûlé</p>
-                                    <img id="img-frein-10" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Frein10">
-                                    <p class="image-legend">Fig. 7J : Propagation jante</p>
-                                </div>
-                            </div>
-                            <div class="fiche-info">
-                                <div class="fiche-section">
-                                    <h4>Mécanisme de Surchauffe</h4>
-                                    <p>Un freinage prolongé (descente col, remorque) ou un étrier bloqué génère un frottement permanent plaquettes/disque. La température monte à 600-800°C, pouvant enflammer les dépôts d'huile/poussière, le liquide de frein (ébullition >230°C), et les plastiques.</p>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Scénarios à Risque</h4>
-                                    <ul>
-                                        <li><strong>Descente prolongée :</strong> Frein moteur insuffisant → freinage continu → surchauffe</li>
-                                        <li><strong>Remorque :</strong> Poids remorqué > capacité freinage → effort excessif</li>
-                                        <li><strong>Étrier collé :</strong> Piston étrier grippé → plaquettes restent serrées</li>
-                                        <li><strong>Liquide frein :</strong> Liquide vieux (>2 ans) → point ébullition ↓ (hygroscopique)</li>
-                                        <li><strong>Plaquettes HS :</strong> Plaquettes usées métal/métal → étincelles</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Signes d'Alerte</h4>
-                                    <ul>
-                                        <li><span class="badge badge-red">Pédale molle</span> Liquide frein en ébullition (>230°C) → vapeur dans circuit</li>
-                                        <li><span class="badge badge-red">Odeur</span> Odeur âcre brûlé (plaquettes, poussière)</li>
-                                        <li><span class="badge badge-orange">Fumée</span> Fumée blanche depuis roues (liquide/poussière)</li>
-                                        <li><span class="badge badge-orange">Perte efficacité</span> Distance freinage ↑ (fade braking)</li>
-                                        <li><span class="badge badge-blue">Disque bleu</span> Disque couleur bleue/violette (>500°C)</li>
-                                        <li><span class="badge badge-blue">Jante chaude</span> Jante brûlante (>150°C)</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Investigation Post-Incendie</h4>
-                                    <ol>
-                                        <li><strong>Vérifier étriers :</strong> Piston libre ou grippé? (doit rentrer facilement)</li>
-                                        <li><strong>Analyser plaquettes :</strong> Usure métal/métal? (témoins usés)</li>
-                                        <li><strong>Contrôler liquide :</strong> Point ébullition (neuf >230°C, vieux <150°C)</li>
-                                        <li><strong>Vérifier disques :</strong> Voilure, fissures thermiques (>600°C)</li>
-                                        <li><strong>Analyser flexibles :</strong> Flexibles frein fondus/intacts?</li>
-                                    </ol>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="warning-box danger">
-                            <strong>⚠️ Danger Perte Freinage :</strong> Liquide frein DOT 4 bout à 230°C. En ébullition, formation de vapeur incompressible → pédale molle → perte totale freinage! Remplacer liquide tous les 2 ans (hygroscopique).
-                        </div>
-                    </div>
-
-                    <!-- COURROIES -->
-                    <div class="fiche" id="fiche-courroies">
-                        <h3>Courroies et Transmission</h3>
-                        
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <div class="image-gallery">
-                                    <img id="img-courr-1" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Courr1">
-                                    <p class="image-legend">Fig. 8A : Courroie accessoire fondue</p>
-                                    <img id="img-courr-2" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Courr2">
-                                    <p class="image-legend">Fig. 8B : Poulie bloquée</p>
-                                    <img id="img-courr-3" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Courr3">
-                                    <p class="image-legend">Fig. 8C : Frottement intense</p>
-                                    <img id="img-courr-4" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="Courr4">
-                                    <p class="image-legend">Fig. 8D : Caoutchouc brûlé</p>
-                                    <img id="img-courr-5" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Courr5">
-                                    <p class="image-legend">Fig. 8E : Alternateur bloqué</p>
-                                    <img id="img-courr-6" src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Courr6">
-                                    <p class="image-legend">Fig. 8F : Pompe eau grippée</p>
-                                    <img id="img-courr-7" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Courr7">
-                                    <p class="image-legend">Fig. 8G : Odeur caoutchouc</p>
-                                    <img id="img-courr-8" src="https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800" alt="Courr8">
-                                    <p class="image-legend">Fig. 8H : Propagation moteur</p>
-                                    <img id="img-courr-9" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Courr9">
-                                    <p class="image-legend">Fig. 8I : Comparaison</p>
-                                    <img id="img-courr-10" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Courr10">
-                                    <p class="image-legend">Fig. 8J : Courroie distribution</p>
-                                </div>
-                            </div>
-                            <div class="fiche-info">
-                                <div class="fiche-section">
-                                    <h4>Mécanisme de Surchauffe</h4>
-                                    <p>Une poulie bloquée (alternateur, pompe à eau, climatisation) ou une courroie mal tendue génère un frottement intense. La courroie caoutchouc chauffe à 150-250°C, fond et peut s'enflammer (>400°C).</p>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Causes</h4>
-                                    <ul>
-                                        <li><strong>Poulie bloquée :</strong> Roulement alternateur/pompe grippé</li>
-                                        <li><strong>Tension :</strong> Courroie trop tendue (frottement) ou détendue (patinage)</li>
-                                        <li><strong>Alignement :</strong> Poulies désalignées → usure asymétrique → échauffement</li>
-                                        <li><strong>Vieillissement :</strong> Courroie craquelée, effilochée (>60 000 km)</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Signes</h4>
-                                    <ul>
-                                        <li><span class="badge badge-red">Odeur</span> Odeur caoutchouc brûlé intense</li>
-                                        <li><span class="badge badge-orange">Fumée</span> Fumée blanche depuis courroie</li>
-                                        <li><span class="badge badge-blue">Bruit</span> Sifflement aigu (courroie patine)</li>
-                                        <li><span class="badge badge-blue">Visuel</span> Courroie fondue, effilochée, noire</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- NOUVEAU : ANALYSE DES TÔLES ET COULEURS -->
-            <section id="analyse-tôles" class="section">
-                <h2>🎨 Analyse des Tôles & Détermination de l'Origine</h2>
-                
-                <div class="section-intro">
-                    <p><strong>Objectif expert :</strong> Déterminer l'origine et la propagation d'un incendie de véhicule complet par l'analyse des couleurs de tôles, des patterns de combustion, et la distinction entre feu d'origine véhicule vs propagation externe.</p>
-                </div>
-
-                <div class="fiche-container">
-                    <!-- COULEURS TÔLES -->
-                    <div class="fiche" id="fiche-couleurs">
-                        <h3>Couleurs des Tôles - Indicateurs de Température</h3>
-                        
-                        <div class="fiche-section">
-                            <h4>Principe Scientifique</h4>
-                            <p>L'acier des carrosseries automobiles change de couleur en fonction de la température atteinte et de la durée d'exposition. Ces changements de couleur (tempering colors) sont dus à l'oxydation de surface et à la formation d'oxydes de fer d'épaisseurs différentes. Chaque couleur correspond à une plage de température spécifique.</p>
-                        </div>
-
-                        <div class="color-chart">
-                            <div class="color-box natural">
-                                <h5>🔘 Gris Naturel</h5>
-                                <p><strong>Température :</strong> <200°C<br><strong>État :</strong> Tôle non affectée<br><strong>Oxydation :</strong> Aucune</p>
-                            </div>
-                            <div class="color-box yellow">
-                                <h5>🟡 Jaune Paille</h5>
-                                <p><strong>Température :</strong> 200-300°C<br><strong>État :</strong> Début oxydation<br><strong>Peinture :</strong> Cloquée</p>
-                            </div>
-                            <div class="color-box brown">
-                                <h5>🟤 Brun/Rouge</h5>
-                                <p><strong>Température :</strong> 300-500°C<br><strong>État :</strong> Oxydation modérée<br><strong>Peinture :</strong> Brûlée</p>
-                            </div>
-                            <div class="color-box blue">
-                                <h5> Bleu/Violet</h5>
-                                <p><strong>Température :</strong> 500-700°C<br><strong>État :</strong> Oxydation avancée<br><strong>Métal :</strong> Recuit</p>
-                            </div>
-                            <div class="color-box oxidized">
-                                <h5>⚫ Gris Foncé/Noir</h5>
-                                <p><strong>Température :</strong> >700°C<br><strong>État :</strong> Oxydation totale<br><strong>Métal :</strong> Déformé</p>
-                            </div>
-                        </div>
-
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <div class="image-gallery">
-                                    <img id="img-tole-1" src="https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800" alt="Tole1">
-                                    <p class="image-legend">Fig. 9A : Tôle gris naturel (non affectée)</p>
-                                    <img id="img-tole-2" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Tole2">
-                                    <p class="image-legend">Fig. 9B : Couleur jaune paille (200-300°C)</p>
-                                    <img id="img-tole-3" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Tole3">
-                                    <p class="image-legend">Fig. 9C : Brun/rouge (300-500°C)</p>
-                                    <img id="img-tole-4" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Tole4">
-                                    <p class="image-legend">Fig. 9D : Bleu/violet (500-700°C)</p>
-                                    <img id="img-tole-5" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Tole5">
-                                    <p class="image-legend">Fig. 9E : Gris foncé/noir (>700°C)</p>
-                                    <img id="img-tole-6" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="Tole6">
-                                    <p class="image-legend">Fig. 9F : Gradient de couleurs</p>
-                                    <img id="img-tole-7" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Tole7">
-                                    <p class="image-legend">Fig. 9G : V-pattern sur tôle</p>
-                                    <img id="img-tole-8" src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Tole8">
-                                    <p class="image-legend">Fig. 9H : Point d'origine (couleur max)</p>
-                                    <img id="img-tole-9" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Tole9">
-                                    <p class="image-legend">Fig. 9I : Déformation tôle (>600°C)</p>
-                                    <img id="img-tole-10" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Tole10">
-                                    <p class="image-legend">Fig. 9J : Comparaison côtés</p>
-                                </div>
-                            </div>
-                            <div class="fiche-info">
-                                <div class="fiche-section">
-                                    <h4>Méthodologie d'Analyse</h4>
-                                    <ol>
-                                        <li><strong>Cartographier les couleurs :</strong> Relever systématiquement les couleurs sur toutes les tôles (capot, portes, coffre, ailes, toit)</li>
-                                        <li><strong>Identifier le gradient :</strong> Les couleurs les plus chaudes (bleu/noir) indiquent la zone la plus proche de l'origine</li>
-                                        <li><strong>Rechercher le V-pattern :</strong> Pattern en V caractéristique de la propagation verticale du feu</li>
-                                        <li><strong>Analyser l'épaisseur oxydation :</strong> Plus l'oxydation est épaisse, plus l'exposition a été longue/intense</li>
-                                        <li><strong>Comparer côtés :</strong> Asymétrie des couleurs = propagation directionnelle</li>
-                                        <li><strong>Vérifier déformations :</strong> Déformation tôle = température >600°C prolongée</li>
-                                    </ol>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Interprétation des Patterns</h4>
-                                    <ul>
-                                        <li><span class="badge badge-red">Zone noire/bleue</span> Zone la plus chaude, proche de l'origine (<2m)</li>
-                                        <li><span class="badge badge-orange">Gradient décroissant</span> Sens de propagation du feu (du chaud vers le froid)</li>
-                                        <li><span class="badge badge-blue">V-pattern</span> Feu ayant démarré en bas et monté (liquide inflammable)</li>
-                                        <li><span class="badge badge-purple">Asymétrie</span> Feu venant d'un côté spécifique</li>
-                                        <li><span class="badge badge-green">Uniformité</span> Feu ayant embrasé tout le véhicule rapidement</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="warning-box info">
-                            <strong> Point Expert :</strong> La couleur bleue apparaît à 500-700°C et indique une exposition prolongée (>10 min). Le noir complet (>700°C) signifie que la tôle a perdu sa résistance mécanique et peut être déformée.
-                        </div>
-                    </div>
-
-                    <!-- ORIGINE VÉHICULE vs EXTERNE -->
-                    <div class="fiche" id="fiche-origine">
-                        <h3>Origine du Feu : Véhicule vs Propagation Externe</h3>
-                        
-                        <div class="fiche-content">
-                            <div class="fiche-image">
-                                <div class="image-gallery">
-                                    <img id="img-orig-1" src="https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800" alt="Orig1">
-                                    <p class="image-legend">Fig. 10A : Feu origine véhicule (moteur)</p>
-                                    <img id="img-orig-2" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Orig2">
-                                    <p class="image-legend">Fig. 10B : Feu origine véhicule (intérieur)</p>
-                                    <img id="img-orig-3" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Orig3">
-                                    <p class="image-legend">Fig. 10C : Propagation externe (herbe)</p>
-                                    <img id="img-orig-4" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Orig4">
-                                    <p class="image-legend">Fig. 10D : Propagation externe (bâtiment)</p>
-                                    <img id="img-orig-5" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Orig5">
-                                    <p class="image-legend">Fig. 10E : Feu origine pneu</p>
-                                    <img id="img-orig-6" src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="Orig6">
-                                    <p class="image-legend">Fig. 10F : Feu origine habitacle</p>
-                                    <img id="img-orig-7" src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Orig7">
-                                    <p class="image-legend">Fig. 10G : Comparaison bas/haut</p>
-                                    <img id="img-orig-8" src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Orig8">
-                                    <p class="image-legend">Fig. 10H : Pattern propagation</p>
-                                    <img id="img-orig-9" src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Orig9">
-                                    <p class="image-legend">Fig. 10I : Sol brûlé (externe)</p>
-                                    <img id="img-orig-10" src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Orig10">
-                                    <p class="image-legend">Fig. 10J : Véhicule voisin brûlé</p>
-                                </div>
-                            </div>
-                            <div class="fiche-info">
-                                <div class="fiche-section">
-                                    <h4>Feu d'Origine Véhicule - Indices</h4>
-                                    <ul>
-                                        <li><strong>Point d'origine interne :</strong> Moteur, habitacle, coffre, pneu</li>
-                                        <li><strong>Pattern V inversé :</strong> Feu parti d'un point et propagation vers l'extérieur</li>
-                                        <li><strong>Dégâts maximum :</strong> Au point d'origine (moteur carbonisé, habitacle effondré)</li>
-                                        <li><strong>Propagation logique :</strong> Du point d'origine vers l'extérieur</li>
-                                        <li><strong>Traces fluides :</strong> Présence huile, carburant, liquide frein au point d'origine</li>
-                                        <li><strong>Sol intact :</strong> Sol autour du véhicule non brûlé (sauf projection)</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Feu par Propagation Externe - Indices</h4>
-                                    <ul>
-                                        <li><strong>Point d'origine externe :</strong> Herbe, bâtiment, véhicule voisin, poubelle</li>
-                                        <li><strong>Pattern bas → haut :</strong> Feu parti du sol et monté sur le véhicule</li>
-                                        <li><strong>Sol brûlé :</strong> Herbe, carton, déchets brûlés sous/autour du véhicule</li>
-                                        <li><strong>Bas du véhicule :</strong> Dégâts maximum sur parties basses (passages de roues, bas de caisse)</li>
-                                        <li><strong>Toit préservé :</strong> Toit moins affecté que le bas (contrairement feu interne)</li>
-                                        <li><strong>Contexte :</strong> Véhicule garé sur végétation sèche, près bâtiment en feu</li>
-                                    </ul>
-                                </div>
-
-                                <div class="fiche-section">
-                                    <h4>Tableau Comparatif Détaillé</h4>
-                                    <table class="diagnostic-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Critère</th>
-                                                <th>Feu Origine Véhicule</th>
-                                                <th>Propagation Externe</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Point départ</td>
-                                                <td>Interne (moteur, habitacle)</td>
-                                                <td>Externe (sol, végétation)</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Pattern</td>
-                                                <td>V inversé (dedans → dehors)</td>
-                                                <td>V normal (bas → haut)</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Sol</td>
-                                                <td>Intact (sauf projection)</td>
-                                                <td>Brûlé (herbe, carton)</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Dégâts max</td>
-                                                <td>Point origine interne</td>
-                                                <td>Parties basses véhicule</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Toit</td>
-                                                <td>Très affecté (feu monte)</td>
-                                                <td>Moins affecté</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Passages roues</td>
-                                                <td>Variables</td>
-                                                <td>Très brûlés</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Contexte</td>
-                                                <td>Véhicule en marche/arrêt</td>
-                                                <td>Véhicule garé</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Témoins</td>
-                                                <td>Fumée sortant capot/habitacle</td>
-                                                <td>Feu venant du sol</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="warning-box success">
-                            <strong>✅ Méthode Expert :</strong> Pour déterminer l'origine, commencez toujours par cartographier les couleurs de tôles, identifiez la zone la plus chaude (noir/bleu), puis recherchez le pattern de propagation. Un feu d'origine véhicule aura son point le plus chaud à l'intérieur, un feu externe aura son point le plus chaud en bas du véhicule.
-                        </div>
-
-                        <div class="fiche-section">
-                            <h4>Checklist d'Investigation</h4>
-                            <ol>
-                                <li><strong>Photographier :</strong> Vue d'ensemble 360°, détails tôles, sol environnant</li>
-                                <li><strong>Cartographier :</strong> Relever couleurs tôles sur croquis</li>
-                                <li><strong>Identifier pattern :</strong> V-pattern, gradient, asymétrie</li>
-                                <li><strong>Analyser sol :</strong> Herbe brûlée? Carton? Déchets?</li>
-                                <li><strong>Vérifier contexte :</strong> Véhicule garé où? Proximité bâtiments/végétation?</li>
-                                <li><strong>Rechercher point chaud :</strong> Zone noire/bleue = origine probable</li>
-                                <li><strong>Analyser intérieur :</strong> Dégâts habitacle/moteur comparés à extérieur</li>
-                                <li><strong>Interroger témoins :</strong> Première fumée/flamme vue où?</li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- BATTERIES -->
-            <section id="batteries" class="section">
-                <h2>🔋 Batteries HT/BT</h2>
-                <div class="fiche-container">
-                    <div class="fiche">
-                        <h3>Batteries 12V/24V et Haute Tension</h3>
-                        <div class="fiche-section">
-                            <h4>Contenu Expert Détaillé</h4>
-                            <p>Investigation complète batteries plomb-acide 12V/24V (corrosion, gaz H₂, court-circuit 800A) et batteries Li-ion haute tension (thermal runaway, gaz HF/CO, procédure sécurité VE). Analyses post-incendie, BMS, modules défectueux.</p>
-                        </div>
-                        <div class="image-gallery">
-                            <img src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Bat1">
-                            <p class="image-legend">Fig. 11A : Batterie corrosion</p>
-                            <img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Bat2">
-                            <p class="image-legend">Fig. 11B : Batterie gonflée</p>
-                            <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Bat3">
-                            <p class="image-legend">Fig. 11C : Cosses oxydées</p>
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Bat4">
-                            <p class="image-legend">Fig. 11D : Court-circuit</p>
-                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Bat5">
-                            <p class="image-legend">Fig. 11E : Pack batterie VE</p>
-                            <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Bat6">
-                            <p class="image-legend">Fig. 11F : Module Li-ion</p>
-                            <img src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="Bat7">
-                            <p class="image-legend">Fig. 11G : Thermal runaway</p>
-                            <img src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Bat8">
-                            <p class="image-legend">Fig. 11H : Câbles HV orange</p>
-                            <img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Bat9">
-                            <p class="image-legend">Fig. 11I : BMS</p>
-                            <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Bat10">
-                            <p class="image-legend">Fig. 11J : Procédure sécurité</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- CÂBLES & COSSES -->
-            <section id="cables-cosses" class="section">
-                <h2>🔌 Câbles & Cosses - Analyse Métallurgique</h2>
-                <div class="fiche-container">
-                    <div class="fiche">
-                        <h3>Câbles Cuivre/Aluminium - Perlages et Fusion</h3>
-                        <div class="fiche-section">
-                            <h4>Contenu Expert Détaillé</h4>
-                            <p>Analyse complète câbles automobiles (FLRY-B, FLR2Y, FLR9Y, HV), sections recommandées, dégradation isolation, perlages cuivre (1085°C) vs aluminium (660°C), cristallisation, durcissement, tests isolement. Comparatif Cu vs Al.</p>
-                        </div>
-                        <div class="image-gallery">
-                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Cab1">
-                            <p class="image-legend">Fig. 12A : Faisceau endommagé</p>
-                            <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Cab2">
-                            <p class="image-legend">Fig. 12B : Isolation fondue</p>
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Cab3">
-                            <p class="image-legend">Fig. 12C : Perles cuivre</p>
-                            <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Cab4">
-                            <p class="image-legend">Fig. 12D : Perles aluminium</p>
-                            <img src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="Cab5">
-                            <p class="image-legend">Fig. 12E : Durcissement</p>
-                            <img src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Cab6">
-                            <p class="image-legend">Fig. 12F : Câbles HV orange</p>
-                            <img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Cab7">
-                            <p class="image-legend">Fig. 12G : Cosses oxydées</p>
-                            <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Cab8">
-                            <p class="image-legend">Fig. 12H : Sertissage</p>
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Cab9">
-                            <p class="image-legend">Fig. 12I : Comparatif Cu/Al</p>
-                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Cab10">
-                            <p class="image-legend">Fig. 12J : Cristallisation</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- FEUX CRIMINELS -->
-            <section id="feux-criminels" class="section">
-                <h2>🚨 Feux Criminels</h2>
-                <div class="fiche-container">
-                    <div class="fiche">
-                        <h3>Identification Feux Criminels - Expertise</h3>
-                        <div class="fiche-section">
-                            <h4>Contenu Expert Détaillé</h4>
-                            <p>Méthodologie d'investigation feux criminels : points d'inflammation multiples, accélérateurs (hydrocarbures), destruction rapide, absence cause technique. Prélèvements, chromatographie, conservation scène, aspects légaux.</p>
-                        </div>
-                        <div class="image-gallery">
-                            <img src="https://images.unsplash.com/photo-1599839619722-39751411ea63?w=800" alt="Crim1">
-                            <p class="image-legend">Fig. 13A : Véhicule incendié</p>
-                            <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Crim2">
-                            <p class="image-legend">Fig. 13B : Points multiples</p>
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Crim3">
-                            <p class="image-legend">Fig. 13C : Accélérateurs</p>
-                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Crim4">
-                            <p class="image-legend">Fig. 13D : Traces liquides</p>
-                            <img src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=800" alt="Crim5">
-                            <p class="image-legend">Fig. 13E : Destruction totale</p>
-                            <img src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=800" alt="Crim6">
-                            <p class="image-legend">Fig. 13F : Intérieur brûlé</p>
-                            <img src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800" alt="Crim7">
-                            <p class="image-legend">Fig. 13G : Batterie débranchée</p>
-                            <img src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800" alt="Crim8">
-                            <p class="image-legend">Fig. 13H : Prélèvements</p>
-                            <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800" alt="Crim9">
-                            <p class="image-legend">Fig. 13I : Chromatographie</p>
-                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800" alt="Crim10">
-                            <p class="image-legend">Fig. 13J : Scène crime</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- RECHERCHE IA -->
-            <section id="recherche-ia" class="section">
-                <h2> Recherche Intelligente (Gemini AI)</h2>
-                <div class="fiche">
-                    <p style="padding:20px; background:#f5f5f5; border-radius:8px;">Recherche IA experte - Configuration clé API requise</p>
-                </div>
-            </section>
-
-            <!-- ADMINISTRATION -->
-            <section id="admin" class="section">
-                <h2>⚙️ Administration</h2>
-                <div class="admin-panel">
-                    <div class="admin-card">
-                        <h3>🔑 Clé API Gemini</h3>
-                        <p>Modifiez la clé pour la recherche IA experte</p>
-                        <input type="password" id="geminiKeyInput" placeholder="Clé API Gemini">
-                        <button onclick="saveGeminiKey()" class="btn-primary">💾 Sauvegarder</button>
-                    </div>
-                    <div class="admin-card">
-                        <h3>📥 Télécharger les Images</h3>
-                        <p>Téléchargez 130+ images pour mode hors ligne</p>
-                        <button onclick="downloadAllImages()" class="btn-primary" id="downloadBtn">📥 Télécharger</button>
-                        <div id="downloadProgress" style="display:none; margin-top:15px;">
-                            <div style="background:#e0e0e0; border-radius:8px; overflow:hidden; height:24px;">
-                                <div id="progressBar" style="background:#4caf50; height:100%; width:0%; transition:width 0.3s;"></div>
-                            </div>
-                            <p id="downloadStatus" style="margin-top:8px; font-size:14px;"></p>
-                        </div>
-                        <div id="downloadResult" style="margin-top:10px;"></div>
-                    </div>
-                </div>
-            </section>
-        </main>
+    <div id="lightbox" class="lightbox hidden">
+        <button class="lightbox-close" onclick="closeLightbox()">×</button>
+        <img id="lightboxImg" src="" alt="Photo">
+        <p id="lightboxCaption" class="lightbox-caption"></p>
+        <p id="lightboxCredit" class="lightbox-credit"></p>
     </div>
 
+    <script src="js/database.js"></script>
+    <script src="js/gemini-search.js"></script>
+    <script src="js/app.js"></script>
     <script>
-        // AUTHENTIFICATION
-        let currentUserType = null;
-
-        function togglePasswordFields() {
-            const userType = document.getElementById('userType').value;
-            document.getElementById('passwordGroup').style.display = userType === 'admin' ? 'block' : 'none';
-            document.getElementById('emailGroup').style.display = userType === 'tier' ? 'block' : 'none';
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(r => console.log('✅ SW enregistré:', r.scope))
+                    .catch(e => console.error('❌ SW:', e));
+            });
         }
-
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const userType = document.getElementById('userType').value;
-            const password = document.getElementById('password').value;
-            const email = document.getElementById('email').value;
-            const errorDiv = document.getElementById('loginError');
-
-            if (userType === 'admin' && password === 'Kevin83600') {
-                currentUserType = 'admin';
-                document.getElementById('loginScreen').classList.remove('active');
-                document.getElementById('appScreen').classList.add('active');
-                document.getElementById('adminMenu').style.display = 'block';
-            } else if (userType === 'tier' && email && password) {
-                currentUserType = 'tier';
-                document.getElementById('loginScreen').classList.remove('active');
-                document.getElementById('appScreen').classList.add('active');
-                document.getElementById('adminMenu').style.display = 'none';
-            } else {
-                errorDiv.textContent = '❌ Identifiants incorrects';
-                errorDiv.classList.add('show');
-            }
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            currentUserType = null;
-            document.getElementById('appScreen').classList.remove('active');
-            document.getElementById('loginScreen').classList.add('active');
-            document.getElementById('loginForm').reset();
-        });
-
-        // NAVIGATION
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            document.querySelectorAll('.menu-items a').forEach(a => a.classList.remove('active'));
-            const activeLink = document.getElementById('link-' + sectionId);
-            if (activeLink) activeLink.classList.add('active');
-            document.getElementById('sideMenu').classList.remove('active');
-            document.getElementById('overlay').style.display = 'none';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // MENU
-        document.getElementById('menuToggle').addEventListener('click', function() {
-            document.getElementById('sideMenu').classList.add('active');
-            document.getElementById('overlay').style.display = 'block';
-        });
-
-        document.getElementById('closeMenu').addEventListener('click', function() {
-            document.getElementById('sideMenu').classList.remove('active');
-            document.getElementById('overlay').style.display = 'none';
-        });
-
-        document.getElementById('overlay').addEventListener('click', function() {
-            document.getElementById('sideMenu').classList.remove('active');
-            this.style.display = 'none';
-        });
-
-        // SAUVEGARDER CLÉ GEMINI
-        function saveGeminiKey() {
-            const key = document.getElementById('geminiKeyInput').value;
-            if (key) {
-                localStorage.setItem('geminiApiKey', key);
-                alert('✅ Clé Gemini sauvegardée !');
-            }
-        }
-
-        // TÉLÉCHARGER IMAGES
-        async function downloadAllImages() {
-            const btn = document.getElementById('downloadBtn');
-            const progressDiv = document.getElementById('downloadProgress');
-            const progressBar = document.getElementById('progressBar');
-            const statusText = document.getElementById('downloadStatus');
-            const resultDiv = document.getElementById('downloadResult');
-
-            btn.disabled = true;
-            progressDiv.style.display = 'block';
-            
-            const images = document.querySelectorAll('img[id^="img-"]');
-            let successCount = 0;
-
-            for (let i = 0; i < images.length; i++) {
-                const img = images[i];
-                statusText.textContent = `Téléchargement ${i + 1}/${images.length}...`;
-                progressBar.style.width = ((i + 1) / images.length * 100) + '%';
-
-                try {
-                    const response = await fetch(img.src);
-                    const blob = await response.blob();
-                    const reader = new FileReader();
-                    reader.onloadend = function() {
-                        const base64data = reader.result;
-                        img.src = base64data;
-                        saveImageToDB(img.id, base64data);
-                        successCount++;
-                    };
-                    reader.readAsDataURL(blob);
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                } catch (error) {
-                    console.error('Erreur:', error);
-                }
-            }
-
-            setTimeout(() => {
-                resultDiv.innerHTML = '<div style="padding:12px; background:#c8e6c9; border-radius:8px; color:#2e7d32;">✅ ' + successCount + '/' + images.length + ' images téléchargées</div>';
-                btn.disabled = false;
-            }, 1000);
-        }
-
-        function saveImageToDB(id, data) {
-            const request = indexedDB.open('FireDiagImages', 1);
-            request.onupgradeneeded = function(e) {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains('images')) {
-                    db.createObjectStore('images', { keyPath: 'id' });
-                }
-            };
-            request.onsuccess = function(e) {
-                const db = e.target.result;
-                const tx = db.transaction(['images'], 'readwrite');
-                tx.objectStore('images').put({ id: id, data: data, date: Date.now() });
-            };
-        }
-
-        function loadSavedImages() {
-            const request = indexedDB.open('FireDiagImages', 1);
-            request.onsuccess = function(e) {
-                const db = e.target.result;
-                const tx = db.transaction(['images'], 'readonly');
-                const store = tx.objectStore('images');
-                const getAll = store.getAll();
-                getAll.onsuccess = function() {
-                    getAll.result.forEach(img => {
-                        const imgElement = document.getElementById(img.id);
-                        if (imgElement) imgElement.src = img.data;
-                    });
-                };
-            };
-        }
-
-        window.addEventListener('load', loadSavedImages);
-        console.log('FireDiag Auto Expert v6.0 chargé - Admin: Kevin83600');
     </script>
 </body>
 </html>
