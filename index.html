@@ -3,24 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="description" content="Diag incendie by Kevin - Base technique expert incendie NFPA 921, véhicules thermiques et électriques, investigation">
+    <meta name="description" content="Diag incendie by Kevin v5.0 - Analyse ingénieur expert des incendies de véhicules thermiques, électriques et hybrides">
     <meta name="theme-color" content="#d32f2f">
-
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="images/icon.svg">
     <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192x192.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="DiagIncendie">
     <meta name="msapplication-TileColor" content="#d32f2f">
-    <meta name="msapplication-TileImage" content="images/icon-144x144.png">
-
-    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%23801425'/><path fill='%23ff9800' d='M256 72c12 68 84 98 92 188 4 60-28 112-92 136-64-24-96-76-92-136 4-44 32-72 50-108 6 24 22 36 24 56 14-40 8-92 18-136z'/><circle cx='308' cy='308' r='74' fill='none' stroke='%23fff' stroke-width='30'/><line x1='360' y1='360' x2='428' y2='428' stroke='%23fff' stroke-width='40' stroke-linecap='round'/></svg>">
-
     <link rel="stylesheet" href="css/styles.css">
-    <title>Diag incendie by Kevin v4.0</title>
+    <title>Diag incendie by Kevin v5.0</title>
 </head>
 <body>
     <header class="app-header">
@@ -28,14 +22,14 @@
             <img src="images/icon.svg" alt="Logo" class="header-logo" onerror="this.style.display='none'">
             <div>
                 <h1>🔥 Diag incendie by Kevin</h1>
-                <p class="subtitle">Base technique expert incendie • NFPA 921 • Véhicules électriques</p>
+                <p class="subtitle">v5.0 Ingénieur expert véhicules • NFPA 921 • ASTM E2929</p>
             </div>
         </div>
     </header>
 
     <section class="search-section">
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Rechercher : thermal runaway, perles primaires, HF..." autocomplete="off">
+            <input type="text" id="searchInput" placeholder="Rechercher : B+, runaway, FAP, glycol, CCS..." autocomplete="off">
             <button id="searchBtn" class="btn-primary">🔍 Rechercher</button>
             <button id="geminiSearchBtn" class="btn-secondary">🤖 IA Gemini</button>
         </div>
@@ -43,161 +37,114 @@
         <div id="geminiResults" class="gemini-results"></div>
     </section>
 
-    <div id="connectionStatus" class="connection-status online">
-        <span class="status-icon"></span><span class="status-text">En ligne</span>
-    </div>
+    <div id="connectionStatus" class="connection-status online"><span class="status-icon"></span><span class="status-text">En ligne</span></div>
 
     <nav class="main-nav">
         <button class="nav-btn active" data-filter="all">Tous</button>
         <button class="nav-btn" data-filter="building">🏢 Bâtiment</button>
         <button class="nav-btn" data-filter="electrical">⚡ Électrique</button>
-        <button class="nav-btn" data-filter="vehicle-thermal">🚗 Véhicule thermique</button>
+        <button class="nav-btn" data-filter="vehicle-thermal">🚗 Thermique</button>
         <button class="nav-btn" data-filter="vehicle-electric">🔋 VE / Hybride</button>
         <button class="nav-btn" data-filter="equipment">🧪 Chimique</button>
     </nav>
 
-    <!-- NOUVEAU : Méthodologie NFPA 921 -->
-    <section id="section-methodology">
-        <h2>🔬 Méthodologie NFPA 921</h2>
-        <div class="method-steps" id="methodSteps"></div>
-        <h3 style="margin-top:2rem;color:#d32f2f">📐 Patterns de feu</h3>
-        <div class="patterns-grid" id="patternsGrid"></div>
+    <!-- ===== MODULE EXPERT VÉHICULES v5.0 ===== -->
+    <section id="section-vehicle-zones">
+        <h2>📍 Zones du véhicule & risques</h2>
+        <div class="ve-zones" id="vz-grid"></div>
     </section>
 
-    <!-- NOUVEAU : Chimie du feu & phénomènes -->
-    <section id="section-chemistry">
-        <h2>⚗️ Chimie du feu & phénomènes</h2>
-        <h3>Tétraèdre du feu</h3>
-        <div class="tetrahedron" id="tetrahedron"></div>
-        <h3>Phénomènes dangereux</h3>
-        <div class="phenomena-grid" id="phenomenaGrid"></div>
-        <h3>Gaz toxiques</h3>
+    <section id="section-vehicle-origins">
+        <h2>🎯 Origines de départ (analyse ingénieur)</h2>
+        <p class="ve-intro">Touchez chaque bloc pour déplier mécanismes de défaillance, preuves et données chiffrées.</p>
+        <div id="vo-grid"></div>
+    </section>
+
+    <section id="section-vehicle-plastics">
+        <h2>🧱 Polymères & charge calorifique</h2>
         <div class="table-container">
-            <table class="metal-table" id="gasTable">
-                <thead><tr><th>Gaz</th><th>Source</th><th>Danger</th></tr></thead>
-                <tbody></tbody>
-            </table>
+            <table class="metal-table"><thead><tr><th>Polymère</th><th>Usages</th><th>Comportement au feu</th><th>Rôle dans l'incendie</th></tr></thead><tbody id="vp-table"></tbody></table>
+        </div>
+        <div class="id-card" id="vf-load" style="margin-top:1rem"></div>
+    </section>
+
+    <section id="section-vehicle-development">
+        <h2>📈 Développement du feu</h2>
+        <h3>Phases</h3><div id="vd-stages" class="runaway-phases"></div>
+        <h3>Aéraulique & comburant (fenêtres, garage, vent)</h3><div class="id-card" id="vd-vent"></div>
+        <h3>Chemins de propagation</h3><div class="id-card" id="vd-spread"></div>
+        <h3>Lecture de direction (preuves)</h3><div class="id-card" id="vd-dir"></div>
+    </section>
+
+    <section id="section-ev-expert">
+        <h2>🔋 Batterie HT : séquence & preuves</h2>
+        <h3>Séquence thermique du runaway</h3><div id="ev-seq" class="runaway-phases"></div>
+        <h3>Gaz de dégazage</h3><div id="ev-gas"></div>
+        <h3>Déclencheurs</h3><div class="id-card" id="ev-trig"></div>
+        <h3>Cause interne VS conséquence externe</h3><div class="id-card" id="ev-cc"></div>
+        <h3>Défauts de charge</h3><div class="id-card" id="ev-chg"></div>
+        <h3>Ré-ignition</h3><div id="ev-reig"></div>
+        <h3>Extinction</h3><div class="id-card" id="ev-ext"></div>
+    </section>
+
+    <section id="section-thermal-expert">
+        <h2>🚗 Spécifique thermique</h2>
+        <div id="th-expert" class="runaway-details"></div>
+    </section>
+
+    <section id="section-melt-map">
+        <h2>🗺️ Cartographie de fusion (bornes de T°)</h2>
+        <div class="table-container">
+            <table class="metal-table"><thead><tr><th>Matériau</th><th>T° fusion / effet</th><th>Interprétation</th></tr></thead><tbody id="vm-table"></tbody></table>
         </div>
     </section>
 
-    <section>
-        <h2>🎯 Sources de départ incendie</h2>
-        <div class="causes-grid" id="causesGrid"></div>
+    <section id="section-vehicle-protocol">
+        <h2>🧑‍🔬 Protocole d'investigation véhicule</h2>
+        <div class="method-steps" id="vproto"></div>
     </section>
 
-    <!-- NOUVEAU : Véhicules thermiques détaillés -->
-    <section id="section-vehicle-thermal">
-        <h2>🚗 Véhicules thermiques (détaillé)</h2>
-        <h3>Compartiment moteur</h3>
-        <div class="causes-grid" id="engineCauses"></div>
-        <h3>Habitacle</h3>
-        <div class="causes-grid" id="cabinCauses"></div>
+    <!-- ===== SECTIONS EXISTANTES ===== -->
+    <section><h2>🎯 Sources de départ incendie</h2><div class="causes-grid" id="causesGrid"></div></section>
+    <section><h2>🌡️ Points de fusion des métaux</h2>
+        <div class="table-container"><table id="metalTable" class="metal-table"><thead><tr><th>Métal</th><th>°C</th><th>°F</th><th>Aspect après feu</th></tr></thead><tbody></tbody></table></div>
     </section>
-
-    <!-- NOUVEAU : Véhicules électriques experts -->
-    <section id="section-vehicle-electric">
-        <h2>🔋 Véhicules électriques (expert)</h2>
-        <h3>Chimies de batteries</h3>
-        <div class="chem-grid" id="chemGrid"></div>
-        <h3>Thermal Runaway (emballement)</h3>
-        <div class="runaway-phases" id="runawayPhases"></div>
-        <h3>Indicateurs & extinction</h3>
-        <div class="runaway-details" id="runawayDetails"></div>
-        <h3>Causes spécifiques</h3>
-        <div class="causes-grid" id="evCauses"></div>
-    </section>
-
-    <!-- NOUVEAU : Véhicules hybrides -->
-    <section id="section-vehicle-hybrid">
-        <h2>🔄 Véhicules hybrides</h2>
-        <div id="hybridInfo"></div>
-    </section>
-
-    <!-- NOUVEAU : Bâtiments enrichi -->
-    <section id="section-buildings">
-        <h2>🏢 Bâtiments (causes détaillées)</h2>
-        <div class="causes-grid" id="buildingCauses"></div>
-        <h3>Modes de propagation</h3>
-        <div class="propagation-grid" id="propagationGrid"></div>
-    </section>
-
-    <!-- NOUVEAU : Chimique -->
-    <section id="section-chemical">
-        <h2>🧪 Chimique</h2>
-        <h3>Auto-inflammation</h3>
-        <div class="table-container">
-            <table class="metal-table" id="selfIgnitionTable">
-                <thead><tr><th>Matériau</th><th>T° auto-infl.</th><th>Mécanisme</th><th>Prévention</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        <h3>Incompatibilités chimiques</h3>
-        <div id="incompatibilities"></div>
-    </section>
-
-    <section>
-        <h2>🌡️ Points de fusion des métaux</h2>
-        <div class="table-container">
-            <table id="metalTable" class="metal-table">
-                <thead><tr><th>Métal</th><th>°C</th><th>°F</th><th>Aspect après feu</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </section>
-
-    <section>
-        <h2>🔌 Analyse des fils électriques (ASTM E2929)</h2>
-        <div class="analysis-grid" id="wireAnalysisGrid"></div>
-    </section>
-
-    <section>
-        <h2>🔩 Identification sur métal</h2>
-        <div class="identification-cards" id="metalIdGrid"></div>
-    </section>
-
-    <section>
-        <h2>📷 Galerie photos par cas</h2>
-        <div class="gallery-grid" id="photoGallery"></div>
-    </section>
+    <section><h2>🔌 Analyse des fils (ASTM E2929)</h2><div class="analysis-grid" id="wireAnalysisGrid"></div></section>
+    <section><h2>🔩 Identification sur métal</h2><div class="identification-cards" id="metalIdGrid"></div></section>
+    <section><h2>📷 Galerie photos par cas</h2><div class="gallery-grid" id="photoGallery"></div></section>
 
     <section class="storage-info">
         <div class="storage-card">
-            <h3>💾 Base de données locale v4.0</h3>
+            <h3>💾 Base locale v5.0 expert</h3>
             <p id="storageStatus">Initialisation...</p>
-            <button id="offlinePhotosBtn" class="btn-offline">📥 Rendre les photos disponibles hors ligne</button>
+            <button id="offlinePhotosBtn" class="btn-offline">📥 Photos hors ligne</button>
             <p id="offlineProgress" class="offline-progress"></p>
             <div class="storage-stats">
                 <div class="stat"><span class="stat-label">Causes</span><span class="stat-value" id="casesCount">0</span></div>
                 <div class="stat"><span class="stat-label">Photos</span><span class="stat-value" id="photosCount">0</span></div>
-                <div class="stat"><span class="stat-label">Métaux</span><span class="stat-value" id="metalsCount">0</span></div>
-                <div class="stat"><span class="stat-label">Patterns</span><span class="stat-value" id="patternsCount">0</span></div>
             </div>
         </div>
     </section>
 
     <footer class="app-footer">
-        <p>© 2026 Diag incendie by Kevin - Base expert incendie</p>
-        <p class="version">v4.0 - NFPA 921 • ENFSI • DGSCGC • NIST • ASTM E2929</p>
-        <p class="version">Android 🤖 • Windows 🪟 • Apple 🍎</p>
+        <p>© 2026 Diag incendie by Kevin</p>
+        <p class="version">v5.0 ingénieur expert • NFPA 921 • ASTM E2929 • ENFSI • NIST</p>
     </footer>
 
     <div id="lightbox" class="lightbox hidden">
         <button class="lightbox-close" onclick="closeLightbox()">×</button>
-        <img id="lightboxImg" src="" alt="Photo">
+        <img id="lightboxImg" src="" alt="">
         <p id="lightboxCaption" class="lightbox-caption"></p>
         <p id="lightboxCredit" class="lightbox-credit"></p>
     </div>
 
     <script src="js/database.js"></script>
+    <script src="js/vehicle-expert.js"></script>
     <script src="js/gemini-search.js"></script>
     <script src="js/app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(r => console.log('✅ SW enregistré:', r.scope))
-                    .catch(e => console.error('❌ SW:', e));
-            });
+            window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js'));
         }
     </script>
 </body>
