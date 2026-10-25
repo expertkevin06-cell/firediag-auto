@@ -1,0 +1,45 @@
+const STATIC_CACHE = 'tech-static-v6';
+const DYNAMIC_CACHE = 'tech-dynamic-v6';
+const STATIC_ASSETS = ['./', './index.html', './manifest.json', './css/styles.css', './js/app.js', './js/database.js', './js/vehicle-expert.js', './js/gemini-search.js', './images/icon.svg', './images/bg-vehicle-fire.png'];
+
+self.addEventListener('install', (e) => {
+    e.waitUntil(caches.open(STATIC_CACHE).then(c => c.addAll(STATIC_ASSETS)).then(() => self.skipWaiting()));
+});
+self.addEventListener('activate', (e) => {
+    e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== STATIC_CACHE && k !== DYNAMIC_CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+});
+self.addEventListener('fetch', (e) => {
+    const url = new URL(e.request.url);
+    if (e.request.method !== 'GET') return;
+    if (url.hostname.includes('generativelanguage.googleapis.com')) { e.respondWith(networkFirst(e.request)); return; }
+    if (e.request.destination === 'image') { e.respondWith(cacheFirst(e.request)); return; }
+    e.respondWith(networkFirstWithCache(e.request));
+});
+async function cacheFirst(req) {
+    const cached = await caches.match(req);
+    if (cached) return cached;
+    try {
+        const res = await fetch(req);
+        if (res.ok || res.type === 'opaque') { const c = await caches.open(DYNAMIC_CACHE); c.put(req, res.clone()); }
+        return res;
+    } catch (e) { return new Response('', { status: 503 }); }
+}
+async function networkFirst(req) {
+    try {
+        const res = await fetch(req);
+        if (res.ok) { const c = await caches.open(DYNAMIC_CACHE); c.put(req, res.clone()); }
+        return res;
+    } catch (e) { return (await caches.match(req)) || new Response(JSON.stringify({ error: 'offline' }), { status: 503 }); }
+}
+async function networkFirstWithCache(req) {
+    try {
+        const res = await fetch(req);
+        if (res.ok) { const c = await caches.open(DYNAMIC_CACHE); c.put(req, res.clone()); }
+        return res;
+    } catch (e) {
+        const cached = await caches.match(req);
+        if (cached) return cached;
+        if (req.mode === 'navigate') return caches.match('./index.html');
+        return new Response('', { status: 503 });
+    }
+}
