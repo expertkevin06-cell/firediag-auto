@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Envoi icônes + fond - Tech incendie</title>
+<style>body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;padding:1.5rem;max-width:700px;margin:auto}h1{color:#8f1d2c;font-size:1.4rem}.step{background:#fff;border-left:5px solid #8f1d2c;padding:.8rem 1rem;margin:1rem 0;border-radius:8px}input{width:100%;padding:.7rem;margin:.3rem 0;border:2px solid #ddd;border-radius:8px;font-size:1rem;box-sizing:border-box}button{width:100%;padding:1rem;margin:.5rem 0;border:none;border-radius:8px;font-size:1.05rem;font-weight:700;color:#fff;cursor:pointer}#gen{background:#d32f2f}#send{background:#2e7d32}button:disabled{background:#999}#status{font-weight:700;margin:1rem 0;color:#2e7d32}#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:.6rem}.card{background:#fff;border-radius:8px;padding:.5rem;text-align:center;font-size:.62rem}label{display:block;background:#fff;border:3px dashed #8f1d2c;border-radius:10px;padding:.8rem;text-align:center;margin:.6rem 0;cursor:pointer;font-size:.9rem}</style>
+</head>
+<body>
+<h1>📤 Tech incendie — icônes + fond d'écran</h1>
+<div class="step"><strong>1.</strong> Créez un NOUVEAU token (l'ancien est supprimé) : Settings → Developer settings → Fine-grained tokens → dépôt <code>diag-incendie</code> → Contents Read and write.</div>
+<div class="step"><strong>2.</strong> Placez l'<strong>image icône</strong> (flamme + véhicule) puis l'<strong>image fond</strong> (véhicule en feu) enregistrées sur votre téléphone.</div>
+<div class="step"><strong>3.</strong> Token → bouton 1️⃣ → bouton 2️⃣.</div>
+<input id="user" value="expertkevin06-cell">
+<input id="repo" value="diag-incendie">
+<input id="token" type="password" placeholder="Token github_pat_...">
+<label>🔥 Image ICÔNE (flamme + véhicule)<input type="file" id="iconFile" accept="image/*" hidden></label>
+<label>🌃 Image FOND (véhicule en feu)<input type="file" id="bgFile" accept="image/*" hidden></label>
+<button id="gen">1️⃣ GÉNÉRER (16 icônes + fond)</button>
+<button id="send" disabled>2️⃣ ENVOYER SUR GITHUB</button>
+<div id="status"></div>
+<div id="grid"></div>
+<script>
+const SVG = `<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512' viewBox='0 0 512 512'><defs><linearGradient id='b' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#8f1d2c'/><stop offset='1' stop-color='#4a0b14'/></linearGradient><linearGradient id='f' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#ffb300'/><stop offset='1' stop-color='#f4511e'/></linearGradient></defs><rect width='512' height='512' rx='110' fill='url(#b)'/><path fill='url(#f)' d='M368 64c8 52 62 78 68 144 4 46-20 86-68 104-48-18-72-58-68-104 4-34 24-54 38-82 6 18 16 28 18 44 10-30 6-68 12-106z'/><path fill='#ffffff' d='M92 348h42l30-46h148l36 46h68a14 14 0 0 1 14 14v32h-42a36 36 0 0 0-72 0H198a36 36 0 0 0-72 0H92a14 14 0 0 1-14-14v-18a14 14 0 0 1 14-14z'/><circle cx='162' cy='394' r='26' fill='#4a0b14'/><circle cx='162' cy='394' r='11' fill='#ffffff'/><circle cx='352' cy='394' r='26' fill='#4a0b14'/><circle cx='352' cy='394' r='11' fill='#ffffff'/><rect x='176' y='312' width='120' height='34' rx='8' fill='#8f1d2c'/></svg>`;
+const SIZES = [44,72,96,120,128,144,150,152,167,180,192,310,384,512,1024];
+let icons = [], bgData = null, customIcon = null;
+
+function loadFile(input, cb) {
+    input.addEventListener('change', e => {
+        const f = e.target.files[0]; if (!f) return;
+        const img = new Image();
+        img.onload = () => cb(img);
+        img.src = URL.createObjectURL(f);
+    });
+}
+loadFile(document.getElementById('iconFile'), img => { customIcon = img; document.getElementById('status').textContent = '✅ Icône personnalisée chargée'; });
+loadFile(document.getElementById('bgFile'), img => {
+    const c = document.createElement('canvas');
+    const r = Math.min(1, 1920 / img.width);
+    c.width = img.width * r; c.height = img.height * r;
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    bgData = c.toDataURL('image/png').split(',')[1];
+    document.getElementById('status').textContent = '✅ Fond chargé (' + c.width + '×' + c.height + ')';
+});
+
+document.getElementById('gen').addEventListener('click', async () => {
+    const status = document.getElementById('status'), grid = document.getElementById('grid');
+    status.textContent = '⏳ Génération...';
+    let img = customIcon;
+    if (!img) {
+        img = new Image();
+        const url = URL.createObjectURL(new Blob([SVG], { type: 'image/svg+xml' }));
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    }
+    icons = [];
+    for (const s of SIZES) {
+        const c = document.createElement('canvas'); c.width = s; c.height = s;
+        const ctx = c.getContext('2d');
+        const ratio = Math.max(s / img.width, s / img.height);
+        const w = img.width * ratio, h = img.height * ratio;
+        ctx.drawImage(img, (s - w) / 2, (s - h) / 2, w, h);
+        icons.push({ name: `icon-${s}x${s}.png`, b64: c.toDataURL('image/png').split(',')[1] });
+    }
+    icons.push({ name: 'apple-touch-icon.png', b64: icons.find(i => i.name === 'icon-180x180.png').b64 });
+    if (bgData) icons.push({ name: 'bg-vehicle-fire.png', b64: bgData });
+    grid.innerHTML = icons.map(i => `<div class="card"><img src="data:image/png;base64,${i.b64}" width="52"><br>${i.name}</div>`).join('');
+    status.textContent = `✅ ${icons.length} fichiers prêts (16 icônes + fond). Envoyez !`;
+    document.getElementById('send').disabled = false;
+});
+
+document.getElementById('send').addEventListener('click', async () => {
+    const user = document.getElementById('user').value.trim();
+    const repo = document.getElementById('repo').value.trim();
+    const token = document.getElementById('token').value.trim();
+    const status = document.getElementById('status');
+    if (!token) { alert('Collez le token'); return; }
+    document.getElementById('send').disabled = true;
+    let i = 0;
+    for (const ic of icons) {
+        status.textContent = `📤 ${i + 1}/${icons.length} : ${ic.name}`;
+        let sha;
+        try {
+            const g = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/images/${ic.name}`, { headers: { Authorization: `Bearer ${token}` } });
+            if (g.ok) sha = (await g.json()).sha;
+        } catch (e) {}
+        const body = { message: `Tech incendie : ${ic.name}`, content: ic.b64 };
+        if (sha) body.sha = sha;
+        const r = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/images/${ic.name}`, {
+            method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+        });
+        if (!r.ok) { const err = await r.json().catch(() => ({})); status.textContent = `❌ ${r.status} ${err.message || ''} sur ${ic.name}`; document.getElementById('send').disabled = false; return; }
+        i++;
+    }
+    status.textContent = '✅ TERMINÉ ! Icônes + fond en ligne. Supprimez le token, puis PWABuilder.';
+});
+</script>
+</body>
+</html>
