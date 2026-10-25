@@ -1,0 +1,49 @@
+const CACHE = 'tech-v7';
+const DYN = 'tech-dyn-v7';
+const CORE = ['./', './index.html', './manifest.json', './css/styles.css', './js/app.js', './js/database.js', './js/vehicle-expert.js', './js/photos-reelles.js', './js/gemini-search.js', './images/icon.svg'];
+
+self.addEventListener('install', (e) => {
+    e.waitUntil((async () => {
+        const c = await caches.open(CACHE);
+        await Promise.allSettled(CORE.map(u => c.add(u).catch(() => null)));
+        self.skipWaiting();
+    })());
+});
+self.addEventListener('activate', (e) => {
+    e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k !== DYN).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+});
+self.addEventListener('fetch', (e) => {
+    if (e.request.method !== 'GET') return;
+    const url = new URL(e.request.url);
+    if (url.hostname.includes('generativelanguage.googleapis.com')) { e.respondWith(net(e.request)); return; }
+    if (e.request.destination === 'image') { e.respondWith(cacheImg(e.request)); return; }
+    e.respondWith(netNav(e.request));
+});
+async function cacheImg(req) {
+    const hit = await caches.match(req);
+    if (hit) return hit;
+    try {
+        const res = await fetch(req);
+        if (res.ok || res.type === 'opaque') { const c = await caches.open(DYN); c.put(req, res.clone()); }
+        return res;
+    } catch { return new Response('', { status: 503 }); }
+}
+async function net(req) {
+    try {
+        const res = await fetch(req);
+        if (res.ok) { const c = await caches.open(DYN); c.put(req, res.clone()); }
+        return res;
+    } catch { return (await caches.match(req)) || new Response('{}', { status: 503 }); }
+}
+async function netNav(req) {
+    try {
+        const res = await fetch(req);
+        if (res.ok) { const c = await caches.open(DYN); c.put(req, res.clone()); }
+        return res;
+    } catch {
+        const hit = await caches.match(req);
+        if (hit) return hit;
+        if (req.mode === 'navigate') return (await caches.match('./index.html')) || Response.error();
+        return new Response('', { status: 503 });
+    }
+}
